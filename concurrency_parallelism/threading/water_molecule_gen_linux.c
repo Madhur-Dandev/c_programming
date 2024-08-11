@@ -9,33 +9,27 @@ unsigned int water_molecules = 0;
 
 void *oxygen(void *);
 void *hydrogen(void *);
-void *waiting_animation(void *);
+void waiting_animation(void);
 
 int main(void) {
-	pthread_t threads[MOLECULES + MOLECULES * 2], animation_thread = 0;
-	pthread_attr_t anim_thrd_attr;
-	/* initialization starts */
+	/* total threads will be number of oxygen threads same as
+	 * water molecules and hydrogen threads twice as much as
+	 * the oxygen thread
+	 */
+	unsigned int total_thrds = MOLECULES + MOLECULES * 2;
+	pthread_t threads[total_thrds];
+
+	/* Initialization starts */
 	pthread_mutex_init(&mtx, NULL);
 	pthread_barrier_init(&bar, NULL, 3);
 	sem_init(&sem, 0, 2);
-	/* initialization ends */
+	/* Initialization ends */
 	int res;
 
-	if(res = pthread_attr_init(&anim_thrd_attr))
-		fprintf(stderr, "Cannot initialize thread attribute object\n");
-	else {
-		res = pthread_attr_setdetachstate(&anim_thrd_attr, PTHREAD_CREATE_DETACHED);
-
-		if(res)
-			fprintf(stderr, "Cannot set detach state attribute\n");
-		else {
-			res = pthread_create(&animation_thread, NULL, waiting_animation, NULL);
-
-			if(res)
-				fprintf(stderr, "Cannot display waiting animation\n");
-		}
-	}
-	for(int i = 0; i < MOLECULES + MOLECULES * 2; i++) {
+	/* Initialize first 50 threads as oxygen threads and rest
+	 * as hydrogen threads.
+	 */
+	for(int i = 0; i < total_thrds; i++) {
 		if (i < MOLECULES)
 			res = pthread_create(&threads[i], NULL, oxygen, NULL);
 		else
@@ -47,27 +41,32 @@ int main(void) {
 		}
 	}
 
-	for(int i = 0; i < MOLECULES + MOLECULES * 2; i++) {
-		res = pthread_join(threads[i], NULL);
+	/* Detaching thread to get them working at brackground */
+	for(int i = 0; i < total_thrds; i++) {
+		res = pthread_detach(threads[i]);
 
 		if(res)
 			fprintf(stderr, "The thread can't be join\n");
 	}
 
-	if(animation_thread)
-		pthread_cancel(animation_thread);
+	waiting_animation();
 
 	printf("\rMolecules generated: %d\n", water_molecules);
 
-	/* cleanup starts */
+	/* Resource cleanup starts */
 	pthread_mutex_destroy(&mtx);
 	pthread_barrier_destroy(&bar);
 	sem_destroy(&sem);
-	/* cleanup ends */
-	return 0;
+	/* Resource cleanup ends */
+
+	/* Wait till all background threads complete their execution */
+	pthread_exit(NULL);
 }
 
 void *oxygen(void *arg) {
+	/* Oxygen thread locks the mutex and wait for barrier
+	 * to get 3 threads locked in.
+	 */
 	pthread_mutex_lock(&mtx);
 
 	pthread_barrier_wait(&bar);
@@ -81,7 +80,7 @@ void *oxygen(void *arg) {
 
 	water_molecules++;
 
-	usleep(100000);
+	usleep(10000);
 
 	pthread_mutex_unlock(&mtx);
 
@@ -89,6 +88,9 @@ void *oxygen(void *arg) {
 }
 
 void *hydrogen(void *arg) {
+	/* 2 hydrogen thread will allow to enter barrier then
+	 * other have to until all barrier gets free.
+	 */
 	sem_wait(&sem);
 
 	pthread_barrier_wait(&bar);
@@ -98,7 +100,11 @@ void *hydrogen(void *arg) {
 	return NULL;
 }
 
-void *waiting_animation(void *arg) {
+void waiting_animation(void) {
+	/* using carriage return to start from the beginning
+	 * of the line and replace the word at the current cursor
+	 * position. Thus, creating a loading animation.
+	 */
 	while(1) {
 		printf("\r.");
 		fflush(stdout);
@@ -115,5 +121,7 @@ void *waiting_animation(void *arg) {
 		printf("\r   ");
 		fflush(stdout);
 		usleep(300000);
+		if(water_molecules == MOLECULES)
+			return;
 	}
 }

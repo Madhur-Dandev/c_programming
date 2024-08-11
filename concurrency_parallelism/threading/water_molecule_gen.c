@@ -5,6 +5,10 @@
 #define MOLECULES 50
 
 #ifdef __APPLE__
+/* Apple environment do not support memory barriers.
+ * So we have implement the functionality with mutex
+ * and condition variables.
+ */
 pthread_mutex_t barrier_mtx;
 pthread_cond_t barrier_cv;
 unsigned int current_mem = 0, mem_limit = 3;
@@ -16,6 +20,7 @@ unsigned int water_molecules = 0;
 pthread_mutex_t mtx;
 sem_t *sem;
 
+/* Function declaration */
 void *oxygen(void *);
 void *hydrogen(void *);
 
@@ -23,34 +28,32 @@ void *hydrogen(void *);
 void custom_barrier_wait(void);
 #endif
 
-void *waiting_animation(void *);
+void waiting_animation(void);
 
 int main(void) {
+	/* total threads will be number of oxygen threads same as
+	 * water molecules and hydrogen threads twice as much as
+	 * the oxygen thread
+	 */
 	unsigned int total_thrds = MOLECULES + MOLECULES * 2;
-	pthread_t threads[total_thrds], anim_thrd;
-	pthread_attr_t anim_thrd_attr;
+	pthread_t threads[total_thrds];
 	int res;
 
-	/* initialization starts */
+	/* Initialization starts */
 	pthread_mutex_init(&mtx, NULL);
 #ifdef __APPLE__
+	/* Apple environment do not support unnamed semaphore either.
+	 * So we have to create named semaphore.
+	 */
 	pthread_mutex_init(&barrier_mtx, NULL);
 	pthread_cond_init(&barrier_cv, NULL);
-	sem = sem_open("sem", O_CREAT | O_EXCL, 0644, 2);
 #else
 	pthread_barrier_init(&bar, NULL, 3);
-	sem_t local_sem;
-	sem = &local_sem;
-	res = sem_init(sem, 0, 2);
 #endif
-	pthread_attr_init(&anim_thrd_attr);
-	pthread_attr_setdetachstate(&anim_thrd_attr, PTHREAD_CREATE_DETACHED);
 
-#ifdef __APPLE__
+	sem = sem_open("sem", O_CREAT | O_EXCL, 0644, 2);
+
 	if(sem == SEM_FAILED) {
-#else
-	if(res) {
-#endif
 		char msg[256];
 
 		if(errno == EEXIST)
@@ -64,23 +67,11 @@ int main(void) {
         perror(msg);
         exit(EXIT_FAILURE);
     }
-	/* initialization ends */
+	/* Initialization ends */
 
-	if(res = pthread_attr_init(&anim_thrd_attr))
-		fprintf(stderr, "Cannot initialize thread attribute object\n");
-	else {
-		res = pthread_attr_setdetachstate(&anim_thrd_attr, PTHREAD_CREATE_DETACHED);
-
-		if(res)
-			fprintf(stderr, "Cannot set detach state attribute\n");
-		else {
-			res = pthread_create(&anim_thrd, &anim_thrd_attr, waiting_animation, NULL);
-
-			if(res)
-				fprintf(stderr, "Cannot display waiting animation\n");
-		}
-	}
-
+	/* Initialize first 50 threads as oxygen threads and rest
+	 * as hydrogen threads.
+	 */
 	for(int i = 0; i < total_thrds; i++) {
 		if(i < MOLECULES)
 			res = pthread_create(&threads[i], NULL, oxygen, NULL);
@@ -93,35 +84,38 @@ int main(void) {
 		}
 	}
 
+	/* Detaching thread to get them working at brackground */
 	for(int i = 0; i < total_thrds; i++) {
-		res = pthread_join(threads[i], NULL);
+		res = pthread_detach(threads[i]);
 
 		if(res)
-			fprintf(stderr, "Thread cannot join\n");
+			fprintf(stderr, "Thread cannot undergo detach state.\n");
 	}
 
-	res = pthread_cancel(anim_thrd);
+	waiting_animation();
 
 	printf("\rWater molecules generated: %d\n", water_molecules);
 
-	/* initialization starts */
+	/* Resource cleanup starts */
 	pthread_mutex_destroy(&mtx);
 
 #ifdef __APPLE__
 	pthread_mutex_destroy(&barrier_mtx);
 	pthread_cond_destroy(&barrier_cv);
-	sem_close(sem);
-#else
-	sem_destroy(sem);
 #endif
 
+	sem_close(sem);
 	sem_unlink("sem");
-	/* initialization ends */
+	/* Resource cleanup ends */
 
+	/* Wait till all background threads complete their execution */
 	pthread_exit(NULL);
 }
 
 void *oxygen(void *arg) {
+	/* Oxygen thread locks the mutex and wait for barrier
+	 * to get 3 threads locked in.
+	 */
 	pthread_mutex_lock(&mtx);
 
 #ifdef __APPLE__
@@ -145,6 +139,9 @@ void *oxygen(void *arg) {
 }
 
 void *hydrogen(void *arg) {
+	/* 2 hydrogen thread will allow to enter barrier then
+	 * other have to until all barrier gets free.
+	 */
 	sem_wait(sem);
 
 #ifdef __APPLE__
@@ -159,6 +156,14 @@ void *hydrogen(void *arg) {
 
 #ifdef __APPLE__
 void custom_barrier_wait(void) {
+	/* Conterfeit function of actual 'barrier_wait()' function.
+	 * Logic:
+	 *     If the current member count is less than max size then
+	 *     wait for until it get equal.
+	 *     When it gen equal of or greater than member limit,
+	 *     simply signal every waiting thread on that mutex and
+	 *     they will continue execution.
+	 */
 	pthread_mutex_lock(&barrier_mtx);
 	current_mem++;
 
@@ -171,7 +176,11 @@ void custom_barrier_wait(void) {
 }
 #endif
 
-void *waiting_animation(void *arg) {
+void waiting_animation(void) {
+	/* using carriage return to start from the beginning
+	 * of the line and replace the word at the current cursor
+	 * position. Thus, creating a loading animation.
+	 */
 	while(1) {
 		printf("\r.");
 		fflush(stdout);
@@ -188,6 +197,7 @@ void *waiting_animation(void *arg) {
 		printf("\r   ");
 		fflush(stdout);
 		usleep(300000);
+		if(water_molecules == MOLECULES)
+			return;
 	}
 }
-

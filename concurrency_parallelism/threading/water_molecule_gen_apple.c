@@ -1,3 +1,8 @@
+/* For logic and implementation view
+ * water_molecule_gen_linux.c or
+ * water_molecule_gen.c
+ */
+
 #include "headers.h"
 #include <semaphore.h>
 #include <fcntl.h>
@@ -12,20 +17,17 @@ unsigned int current_mem = 0, mem_limit = 3, water_molecules = 0;
 void *oxygen(void *);
 void *hydrogen(void *);
 void custom_barrier_wait(void);
-void *waiting_animation(void *);
+void waiting_animation(void);
 
 int main(void) {
 	unsigned int total_thrds = MOLECULES + MOLECULES * 2;
-	pthread_t threads[total_thrds], anim_thrd;
-	pthread_attr_t anim_thrd_attr;
+	pthread_t threads[total_thrds];
 	int res;
 
 	/* initialization starts */
 	pthread_mutex_init(&mtx, NULL);
 	pthread_mutex_init(&barrier_mtx, NULL);
 	pthread_cond_init(&barrier_cv, NULL);
-	pthread_attr_init(&anim_thrd_attr);
-	pthread_attr_setdetachstate(&anim_thrd_attr, PTHREAD_CREATE_DETACHED);
 	named_sem = sem_open("sem", O_CREAT | O_EXCL, 0644, 2);
 	if (named_sem == SEM_FAILED) {
 		char msg[256];
@@ -43,21 +45,6 @@ int main(void) {
     }
 	/* initialization ends */
 
-	if(res = pthread_attr_init(&anim_thrd_attr))
-		fprintf(stderr, "Cannot initialize thread attribute object\n");
-	else {
-		res = pthread_attr_setdetachstate(&anim_thrd_attr, PTHREAD_CREATE_DETACHED);
-
-		if(res)
-			fprintf(stderr, "Cannot set detach state attribute\n");
-		else {
-			res = pthread_create(&anim_thrd, &anim_thrd_attr, waiting_animation, NULL);
-
-			if(res)
-				fprintf(stderr, "Cannot display waiting animation\n");
-		}
-	}
-
 	for(int i = 0; i < total_thrds; i++) {
 		if(i < MOLECULES)
 			res = pthread_create(&threads[i], NULL, oxygen, NULL);
@@ -71,13 +58,13 @@ int main(void) {
 	}
 
 	for(int i = 0; i < total_thrds; i++) {
-		res = pthread_join(threads[i], NULL);
+		res = pthread_detach(threads[i]);
 
 		if(res)
-			fprintf(stderr, "Thread cannot join\n");
+			fprintf(stderr, "Thread cannot get into detached state.\n");
 	}
 
-	res = pthread_cancel(anim_thrd);
+	waiting_animation();
 
 	printf("\rWater molecules generated: %d\n", water_molecules);
 
@@ -132,7 +119,7 @@ void custom_barrier_wait(void) {
 	pthread_mutex_unlock(&barrier_mtx);
 }
 
-void *waiting_animation(void *arg) {
+void waiting_animation(void) {
 	while(1) {
 		printf("\r.");
 		fflush(stdout);
@@ -149,5 +136,7 @@ void *waiting_animation(void *arg) {
 		printf("\r   ");
 		fflush(stdout);
 		usleep(300000);
+		if(water_molecules == MOLECULES)
+			return;
 	}
 }
