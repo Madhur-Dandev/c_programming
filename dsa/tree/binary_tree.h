@@ -30,6 +30,8 @@ void postorder(node *);
 
 void preorder_no_recurr(node *);
 
+void postorder_no_recurr(node *);
+
 void levelorder(node *);
 
 int max(node *);

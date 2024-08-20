@@ -33,10 +33,11 @@ int main(void) {
 	preorder(root);
 	puts("");
 	inorder(root);
-	puts("");
+	puts("Post order");
 	postorder(root);
 	puts("");
 	preorder_no_recurr(root);
+	postorder_no_recurr(root);
 	puts("");
 	levelorder(root);
 	puts("");
@@ -180,6 +181,66 @@ void preorder_no_recurr(node *n) {
 		printf("%d ", head->data_node->data);
 		head = head->next;
 		free(temp_node);
+	}
+}
+
+void postorder_no_recurr(node *n) {
+	printf("\nPreorder No recursion:");
+	struct tree_stack *head, *final, *temp;
+	head = final = temp = NULL;
+
+	head = (struct tree_stack *) malloc(sizeof(struct tree_stack));
+
+	if(head == NULL)
+		return;
+
+	head->data_node = n;
+	head->prev = head->next = NULL;
+
+	while(head) {
+		temp = head;
+		head = head->prev;
+		temp->next = temp->prev = NULL;
+		if(final == NULL)
+			final = temp;
+		else {
+			final->next = temp;
+			temp->prev = final;
+			final = final->next;
+		}
+
+		struct tree_stack *new = (struct tree_stack *) malloc(sizeof(struct tree_stack));
+
+		if(new == NULL)
+			return;
+
+		if(temp->data_node->left) {
+			new->data_node = temp->data_node->left;
+			new->prev = new->next = NULL;
+
+			if(head == NULL) {
+				head = new;
+			}
+
+			if(temp->data_node->right) {
+				new = (struct tree_stack *) malloc(sizeof(struct tree_stack));
+				new->data_node = temp->data_node->right;
+				new->prev = new->next = NULL;
+
+				head->next = new;
+				new->prev = head;
+				head = head->next;
+			}
+		}
+		else
+			free(new);
+	}
+
+	while(final) {
+		temp = final;
+		printf("%d ", final->data_node->data);
+		final = final->prev;
+		free(temp);
 	}
 }
 
