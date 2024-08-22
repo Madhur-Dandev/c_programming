@@ -6,6 +6,7 @@ int main(void) {
 	insert(1);
 	insert(2);
 	insert(3);
+//	printf("%d\n", root->left->data);
 	insert(4);
 	insert(5);
 	insert(6);
@@ -23,6 +24,7 @@ int main(void) {
 	insert(18);
 	insert(19);
 	insert(20);
+	levelorder(root);
 	/*insert(5);
 	insert(6);
 	insert(10);
@@ -33,7 +35,7 @@ int main(void) {
 	preorder(root);
 	puts("");
 	inorder(root);
-	puts("Post order");
+	puts("\nPost order");
 	postorder(root);
 	puts("");
 	preorder_no_recurr(root);
@@ -59,50 +61,60 @@ int main(void) {
 }
 
 int insert(int val) {
-	node *temp = NULL;
-	lln *queue = (lln *) malloc(sizeof(lln)), *head = queue;
-	queue->data_node = root;
-	queue->next = NULL;
-	while(head) {
-		if(!head->data_node)
-			break;
-
-		temp = head->data_node;
-		if(!head->data_node->left || !head->data_node->right)
-			break;
-
-		lln *temp1 = (lln *)malloc(sizeof(lln));
-		temp1->data_node = head->data_node->left;
-		if(head->data_node->right) {
-			lln *temp2 = (lln *) malloc(sizeof(lln));
-			temp2->data_node = head->data_node->right;
-			temp1->next = temp2;
-		}
-
-		queue->next = temp1;
-		temp1 = head;
-		head = head->next;
-		queue = queue->next->next;
-		free(temp1);
-	}
-
-	while(head) {
-		lln *temp = head;
-		head = head->next;
-		free(temp);
-	}
+	lln *temp = NULL;
+	lln *queue, *tail;
+	node *parent = NULL;
 
 	node *new_n = (node *) malloc(sizeof(node));
 	new_n->data = val;
 	new_n->left = new_n->right = NULL;
-	if(!temp) {
+	if(root == NULL) {
 		root = new_n;
-	    return 1;
 	}
-    if(!temp->left)
-	    temp->left = new_n;
-	else
-		temp->right = new_n;
+	else {
+		tail = queue = (lln *) malloc(sizeof(lln));
+		queue->data_node = root;
+		queue->next = NULL;
+		while(queue) {
+			temp = queue;
+//			printf("%p %p\n", temp->data_node->left, temp->data_node->right);
+			if(temp->data_node->left == NULL ||
+			   temp->data_node->right == NULL)
+				break;
+
+			if(temp->data_node->left != NULL) {
+				lln *temp1 = (lln *)malloc(sizeof(lln));
+				temp1->data_node = temp->data_node->left;
+				temp1->next = NULL;
+				tail->next = temp1;
+				tail = tail->next;
+				if(tail->data_node->right != NULL) {
+					temp1 = (lln *) malloc(sizeof(lln));
+					temp1->data_node = tail->data_node->right;
+					temp1->next = NULL;
+					tail->next = temp1;
+					tail = tail->next;
+				}
+			}
+			queue = queue->next;
+			free(temp);
+		}
+
+		parent = temp->data_node;
+
+		while(queue) {
+			temp = queue;
+			queue = queue->next;
+			free(temp);
+		}
+
+	    if(parent->left == NULL)
+		    parent->left = new_n;
+		else
+			parent->right = new_n;
+	}
+
+	return 1;
 }
 
 void preorder(node *node) {
@@ -220,6 +232,11 @@ void postorder_no_recurr(node *n) {
 
 			if(head == NULL) {
 				head = new;
+			}
+			else {
+				head->next = new;
+				new->prev = head;
+				head = head->next;
 			}
 
 			if(temp->data_node->right) {
