@@ -3,6 +3,14 @@
 #include <limits.h>
 #define MAX 5
 
+<<<<<<< Updated upstream
+uint8_t counter = 0, en = 0, de = 0;
+long int queue[MAX];
+pthread_rwlock_t lock;
+
+void enqueue(int);
+int dequeue(void);
+=======
 uint8_t counter = 0, en = 0, de = 0, p_done = 0;
 int c_read = 0;
 long int queue[MAX];
@@ -13,6 +21,7 @@ pthread_cond_t cnd;
 void enqueue(int);
 int dequeue(void);
 int top(void);
+>>>>>>> Stashed changes
 void *producer(void *);
 void *consumer(void *);
 
@@ -20,6 +29,11 @@ int main(void) {
 	pthread_t prod, cons[MAX];
 	int res;
 
+<<<<<<< Updated upstream
+	res = pthread_rwlock_init(&lock);
+	if(res)
+		THROW_ERROR(res, "Unable to create lock\n");"
+=======
 	res = pthread_rwlock_init(&lock, NULL);
 	if(res)
 		THROW_ERROR(res, "Unable to create lock\n");
@@ -31,6 +45,7 @@ int main(void) {
 	res = pthread_cond_init(&cnd, NULL);
 	if(res)
 		THROW_ERROR(res, "Unable to create condition variable.\n");
+>>>>>>> Stashed changes
 
 	res = pthread_create(&prod, NULL, producer, NULL);
 	if(res)
@@ -54,6 +69,9 @@ int main(void) {
 
 	res = pthread_rwlock_destroy(&lock);
 	if(res)
+<<<<<<< Updated upstream
+		THROW_ERROR(res, "Lock not destroyed\n");
+=======
 		THROW_ERROR(res, "Lock not destroyed.\n");
 
 	res = pthread_mutex_destroy(&mtx);
@@ -63,6 +81,7 @@ int main(void) {
 	res = pthread_cond_destroy(&cnd);
 	if(res)
 		THROW_ERROR(res, "Condition variable not destroyed.\n");
+>>>>>>> Stashed changes
 	return 0;
 }
 
@@ -91,6 +110,10 @@ int dequeue(void) {
 	return return_val;
 }
 
+<<<<<<< Updated upstream
+void *producer(void *arg) {
+	printf("producer\n");
+=======
 int top(void) {
 	return queue[de];
 }
@@ -110,11 +133,15 @@ void *producer(void *arg) {
 //		pthread_rwlock_unlock(&lock);
 	}
 //	printf("producer\n");
+>>>>>>> Stashed changes
 	return NULL;
 }
 
 
 void *consumer(void *arg) {
+<<<<<<< Updated upstream
+	printf("consumer\n");
+=======
 //	pthread_rwlock_rdlock(&lock);
 	for(int i = 0; i < MAX; i++) {
 		pthread_mutex_lock(&mtx);
@@ -131,5 +158,6 @@ void *consumer(void *arg) {
 		pthread_mutex_unlock(&mtx);
 	}
 //	printf("consumer\n");
+>>>>>>> Stashed changes
 	return NULL;
 }
