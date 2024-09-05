@@ -3,6 +3,8 @@
 #define MAX 5
 
 sem_t forks[MAX], room;
+pthread_mutex_t mtx;
+pthread_barrier_t bar;
 
 void *body(void *);
 
@@ -10,9 +12,13 @@ int main(void) {
 	int res, id[MAX];
 	pthread_t philosopher[MAX];
 
-	res = sem_init(&room, 0, 4);
+	res = pthread_mutex_init(&mtx, NULL);
 	if(res)
-		THROW_ERROR(res, "Cannot create the semaphore for philosopher.")
+		THROW_ERROR(res, "Cannot create the mutex.")
+
+	res = pthread_barrier_init(&bar, NULL, MAX);
+	if(res)
+		THROW_ERROR(res, "Cannot create the memory barrier.")
 
 	for(int i = 0; i < MAX; i++) {
 		res = sem_init(&forks[i], 0, 1);
@@ -25,10 +31,12 @@ int main(void) {
 		res = pthread_create(&philosopher[i], NULL, body, (void *) &id[i]);
 		if(res)
 			THROW_ERROR(res, "Cannot create philosopher thread.")
+	}
 
-		res = pthread_detach(philosopher[i]);
+	for(int i = 0; i < MAX; i++) {
+		res = pthread_join(philosopher[i], NULL);
 		if(res)
-			THROW_ERROR(res, "Cannot detach the philosopher thread.")
+			THROW_ERROR(res, "Cannot join the philosopher thread.")
 	}
 
 
@@ -38,9 +46,9 @@ int main(void) {
 			THROW_ERROR(res, "Cannot destroy this fork semaphore.")
 	}
 
-	res = sem_destroy(&room);
+	res = pthread_barrier_destroy(&bar);
 	if(res)
-		THROW_ERROR(res, "Cannot destroy the philosopher semaphore.")
+		THROW_ERROR(res, "Cannot destroy the memory barrier.")
 
 	pthread_exit(NULL);
 	return 0;
@@ -48,14 +56,15 @@ int main(void) {
 
 void *body(void *arg) {
 	int id, left, right;
-	id = left = *((int *) arg);
-	right = (left + 1) % MAX;
+	id  = *((int *) arg);
+	left = id - 1;
+	right = (id) % MAX;
 
 //	for(int i = 0; i < MAX; i++) {
 	while(1) {
 		printf("Philosopher %d is thinking\n", id);
-
-		sem_wait(&room);
+		pthread_barrier_wait(&bar);
+		pthread_mutex_lock(&mtx);
 
 		sem_wait(&forks[left]);
 		sem_wait(&forks[right]);
@@ -65,9 +74,9 @@ void *body(void *arg) {
 		sem_post(&forks[left]);
 		sem_post(&forks[right]);
 
-		sem_post(&room);
+		pthread_mutex_unlock(&mtx);
+		pthread_barrier_wait(&bar);
 	}
 
-//	printf("%d\n", id);
 	return NULL;
 }
