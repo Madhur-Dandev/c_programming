@@ -1,38 +1,38 @@
 #include <stdio.h>
-#include "binary_tree.h"
+#include "btree.h"
 
 int main(void) {
-	root = NULL;
-	insert(1);
-	insert(2);
-	insert(3);
-//	printf("%d\n", root->left->data);
-	insert(4);
-	insert(5);
-	insert(6);
-	insert(7);
-	insert(8);
-	insert(9);
-	insert(10);
-	insert(11);
-	insert(12);
-	insert(13);
-	insert(14);
-	insert(15);
-	insert(16);
-	insert(17);
-	insert(18);
-	insert(19);
-	insert(20);
+	node *root = NULL;
+	insert(&root, 1);
+	insert(&root, 2);
+	insert(&root, 3);
+	printf("%d\n", root->left->data);
+	insert(&root, 4);
+	insert(&root, 5);
+	insert(&root, 6);
+	insert(&root, 7);
+	insert(&root, 8);
+	insert(&root, 9);
+	insert(&root, 10);
+	insert(&root, 11);
+	insert(&root, 12);
+	insert(&root, 13);
+	insert(&root, 14);
+	insert(&root, 15);
+	insert(&root, 16);
+	insert(&root, 17);
+	insert(&root, 18);
+	insert(&root, 19);
+	insert(&root, 20);
 	levelorder(root);
-	/*insert(5);
-	insert(6);
-	insert(10);
-	insert(1);
-	insert(2);
-	insert(200);
-	insert(-19);*/
-	preorder(root);
+	/*insert(&root, 5);
+	insert(&root, 6);
+	insert(&root, 10);
+	insert(&root, 1);
+	insert(&root, 2);
+	insert(&root, 200);
+	insert(&root, -19);*/
+	/*preorder(root);
 	puts("");
 	inorder(root);
 	puts("\nPost order");
@@ -56,11 +56,11 @@ int main(void) {
 	printf("%d\n", size(root));
 	reverse_levelorder(root);
 	puts("");
-	printf("%d\n", get_height(root, 0));
+	printf("%d\n", get_height(root, 0));*/
 	return 0;
 }
 
-int insert(int val) {
+int insert(node **root, int val) {
 	lln *temp = NULL;
 	lln *queue, *tail;
 	node *parent = NULL;
@@ -68,12 +68,12 @@ int insert(int val) {
 	node *new_n = (node *) malloc(sizeof(node));
 	new_n->data = val;
 	new_n->left = new_n->right = NULL;
-	if(root == NULL) {
-		root = new_n;
+	if(*root == NULL) {
+		*root = new_n;
 	}
 	else {
 		tail = queue = (lln *) malloc(sizeof(lln));
-		queue->data_node = root;
+		queue->data_node = *root;
 		queue->next = NULL;
 		while(queue) {
 			temp = queue;
