@@ -22,6 +22,9 @@ int main(void) {
 	printf("Search pointer: %p\tvs\tSearch with no recursion pointer: %p\n", search(root, 2), search_no_recur(root, 2));
 	printf("Size of tree: %d\tvs\tSize of tree with no recursion: %d\n", size(root), size_no_recur(root));
 	printf("Height of tree: %d\n", get_height(root, 0));
+	leaf_nodes_no_recur(root);
+	full_nodes_no_recur(root);
+	half_nodes_no_recur(root);
 	return 0;
 }
 
@@ -302,4 +305,161 @@ int size_no_recur(node *root) {
 //	}
 
 	return counter;
+}
+
+int leaf_nodes_no_recur(node *root) {
+	printf("Leaf nodes: ");
+
+	lln *queue, *tail, *temp;
+
+	queue = tail = (lln *) malloc(sizeof(lln));
+	if(!queue) {
+		err:
+			perror("Unable to find the leaf nodes.");
+			return 0;
+	}
+
+	queue->data_node = root;
+	queue->next = NULL;
+
+	while(queue) {
+		temp = queue;
+		lln *node;
+		node = NULL;
+
+		if(temp->data_node->left == NULL &&
+		   temp->data_node->right == NULL) {
+			printf("%p: %d\n", temp->data_node, temp->data_node->data);
+		}
+
+		if(temp->data_node->left) {
+			node = (lln *) malloc(sizeof(lln));
+			if(!node)
+				goto err;
+
+			node->data_node = temp->data_node->left;
+			node->next = NULL;
+			tail->next = node;
+			tail = node;
+
+			if(temp->data_node->right) {
+				node = (lln *) malloc(sizeof(lln));
+				if(!node)
+					goto err;
+
+				node->data_node = temp->data_node->right;
+				node->next = NULL;
+				tail->next = node;
+				tail = node;
+			}
+		}
+
+		queue = queue->next;
+		free(temp);
+	}
+	return 0;
+}
+
+int full_nodes_no_recur(node *root) {
+	printf("Full nodes: ");
+	lln *queue, *tail, *temp;
+
+	queue = tail = (lln *) malloc(sizeof(lln));
+	if(!queue) {
+		err:
+			perror("Unable to find the full nodes.");
+			return 0;
+	}
+
+	queue->data_node = root;
+	queue->next = NULL;
+
+	while(queue) {
+		temp = queue;
+		lln *node;
+		node = NULL;
+
+		if(temp->data_node->left != NULL &&
+		   temp->data_node->right != NULL) {
+			printf("%p: %d\n", temp->data_node, temp->data_node->data);
+		}
+
+		if(temp->data_node->left) {
+			node = (lln *) malloc(sizeof(lln));
+			if(!node)
+				goto err;
+
+			node->data_node = temp->data_node->left;
+			node->next = NULL;
+			tail->next = node;
+			tail = node;
+
+			if(temp->data_node->right) {
+				node = (lln *) malloc(sizeof(lln));
+				if(!node)
+					goto err;
+
+				node->data_node = temp->data_node->right;
+				node->next = NULL;
+				tail->next = node;
+				tail = node;
+			}
+		}
+
+		queue = queue->next;
+		free(temp);
+	}
+	return 0;
+}
+
+int half_nodes_no_recur(node *root) {
+	printf("Half nodes: ");
+	lln *queue, *tail, *temp;
+
+	queue = tail = (lln *) malloc(sizeof(lln));
+	if(!queue) {
+		err:
+			perror("Unable to find the half nodes.");
+			return 0;
+	}
+
+	queue->data_node = root;
+	queue->next = NULL;
+
+	while(queue) {
+		temp = queue;
+		lln *node;
+		node = NULL;
+
+		if(temp->data_node->left != NULL &&
+		   temp->data_node->right == NULL) {
+			printf("%p: %d\n", temp->data_node, temp->data_node->data);
+		}
+
+		if(temp->data_node->left) {
+			node = (lln *) malloc(sizeof(lln));
+			if(!node)
+				goto err;
+
+			node->data_node = temp->data_node->left;
+			node->next = NULL;
+			tail->next = node;
+			tail = node;
+
+			if(temp->data_node->right) {
+				node = (lln *) malloc(sizeof(lln));
+				if(!node)
+					goto err;
+
+				node->data_node = temp->data_node->right;
+				node->next = NULL;
+				tail->next = node;
+				tail = node;
+			}
+		}
+
+		queue = queue->next;
+		free(temp);
+	}
+	return 0;
 }

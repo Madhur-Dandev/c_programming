@@ -59,3 +59,9 @@ int get_height(node *, int);
 node *search_no_recur(node *, int);
 
 int size_no_recur(node *);
+
+int leaf_nodes_no_recur(node *);
+
+int full_nodes_no_recur(node *);
+
+int half_nodes_no_recur(node *);
