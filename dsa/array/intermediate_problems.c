@@ -3,6 +3,7 @@
 
 int *merge(int *, int *, int, int);
 void rearrange(int *, int);
+void rearrange_preserve(int *, int);
 
 int main(void) {
 	/*int arr1[] = {1, 2, 3, 4, 5};
@@ -15,7 +16,7 @@ int main(void) {
 
 	free(merged_arr);*/
 
-	int arr[] = {1, 0, 2, -1, -2, -3, 3};
+	int arr[] = {1, 0, 2, -1, -2, -3, 3, -1};
 	rearrange(arr, sizeof(arr)/sizeof(int));
 	for(int i = 0; i < sizeof(arr)/sizeof(int); i++) {
 		printf("%d\n", arr[i]);
@@ -40,6 +41,25 @@ int *merge(int *arr1, int *arr2, int size1, int size2) {
 }
 
 void rearrange(int *arr, int size) {
+	int begin = 0, end = size-1;
+	int location = -1;
+	while(begin <= end) {
+		if(arr[begin] < 0)
+			begin++;
+		else if(arr[end] > 0)
+			end--;
+		else {
+			arr[begin] += arr[end];
+			arr[end] = arr[begin] - arr[end];
+			arr[begin] -= arr[end];
+			begin++;
+			end--;
+		}
+	}
+}
+
+void rearrange_preserve(int *arr, int size) {
+	// preserving the order of positive elements
 	int needle = 0;
 	for(int i = 0; i < size; i++) {
 		if(arr[i] < 0)
@@ -62,21 +82,3 @@ void rearrange(int *arr, int size) {
 	return;
 }
 
-/* chatgpt generated
-void rearrange2(int *arr, int size) {
-	int left = 0, right = size - 1;
-	while (left <= right) {
-		if (arr[left] < 0) {
-			left++;
-		} else if (arr[right] >= 0) {
-			right--;
-		} else {
-		// Swap positive element at 'left' with negative element at 'right' 
-		int temp = arr[left];
-		arr[left] = arr[right];
-		arr[right] = temp;
-		left++;
-		right--; 
-	}		
-}
-} */
