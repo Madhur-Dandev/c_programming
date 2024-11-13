@@ -27,6 +27,6 @@ int main(void) {
 		return res;
 	}
 
-	printf("%ld %ld\n", match.rm_so, match.rm_eo);
+	printf("%lld %lld\n", match.rm_so, match.rm_eo);
 	return 0;
 }
