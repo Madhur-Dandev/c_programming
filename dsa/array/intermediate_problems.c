@@ -4,6 +4,8 @@
 int *merge(int *, int *, int, int);
 void rearrange(int *, int);
 void rearrange_preserve(int *, int);
+void zeros_to_end(int *, int);
+void find_duplicates(int *, int, int *);
 
 int main(void) {
 	/*int arr1[] = {1, 2, 3, 4, 5};
@@ -16,11 +18,20 @@ int main(void) {
 
 	free(merged_arr);*/
 
-	int arr[] = {1, 0, 2, -1, -2, -3, 3, -1};
+	/*int arr[] = {1, 0, 2, -1, -2, -3, 3, -1};
 	rearrange(arr, sizeof(arr)/sizeof(int));
 	for(int i = 0; i < sizeof(arr)/sizeof(int); i++) {
 		printf("%d\n", arr[i]);
 	}
+
+	int arr2[] = {0, 1, 2, 0, 512, 0, 6, 0};
+	zeros_to_end(arr2, sizeof(arr2)/sizeof(int));
+	puts("");
+	for(int i = 0; i < sizeof(arr2)/sizeof(int); i++) {
+		printf("%d\n", arr2[i]);
+	}*/
+	int arr[] = {1, 2, 0, 1, 0, 2};
+	find_duplicates(arr, 8, NULL);
 	return 0;
 }
 
@@ -82,3 +93,28 @@ void rearrange_preserve(int *arr, int size) {
 	return;
 }
 
+void zeros_to_end(int *arr, int size) {
+	int count = 0;
+	for (int i = 0; i < size; i++) {
+		if (arr[i] != 0) {
+			arr[count++] = arr[i];
+		}
+	}
+	while (count < size) {
+		arr[count++] = 0;
+	}
+}
+
+void find_duplicates(int *arr, int size, int *returnSize) {
+	if(size <= 0)
+		return;
+
+	for(int i = 0; i < size; i++) {
+		for(int j = i + 1; j < size; j++) {
+			if(arr[i] == arr[j]) {
+				printf("%d\n", arr[i]);
+				break;
+			}
+		}
+	}
+}
