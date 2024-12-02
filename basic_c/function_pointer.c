@@ -17,6 +17,7 @@ void sort_arr(int *, int, int (*)(int, int));
 int ascend(int, int);
 int descend(int, int);
 
+struct 
 int main(void) {
 	// 1. Declare a function pointer
 	float (*func_ptr1)(float, float) = &sub;
