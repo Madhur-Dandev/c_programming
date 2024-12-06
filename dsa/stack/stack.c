@@ -1,25 +1,24 @@
 #include "stack.h"
 
 void push(stack *s, int val) {
-	if(s->top >= INT_MAX) {
+	/*if(s->top >= INT_MAX) {
 		printf("Stack overflowed\n");
 		return;
-	}
-	if(s->top >= s->size) {
+	}*/
+	if(s->top >= s->capacity) {
 		// printf("In ");
 		int *temp = realloc(
 						s->arr,
 						sizeof(int) * (s->capacity * 2)
 					);
 		if(temp == NULL) {
-			printf("Stack overflowed\n");
+			printf("Hey! Stack overflowed\n");
 			return;
 		}
 		s->arr = temp;
 		s->capacity *= 2;
 	}
 	s->arr[s->top++] = val;
-	s->size = s->top;
 	return;
 }
 
@@ -41,28 +40,30 @@ int peek(stack *s) {
 	return s->arr[s->top];
 }
 
-void delete_stack(stack *s) {
+bool isEmpty(stack *s) {
+	return s->top <= 0;
+}
+
+void deleteStack(stack *s) {
 	if(s->arr == NULL) {
 		return;
 	}
 
 	free(s->arr);
 	s->top = 0;
-	s->size = 0;
 	free(s);
 	printf("Stack deleted\n");
 	return;
 }
 
-stack *make_stack() {
+stack *makeStack() {
 	stack *s = malloc(sizeof(stack));
 	s->top = 0;
-	s->size = 0;
 	s->capacity = 8;
-	s->arr = malloc(sizeof(int) * 8);
+	s->arr = (int *) malloc(sizeof(int) * 8);
 	s->push = &push;
 	s->pop = &pop;
 	s->peek = &peek;
-	s->delete_stack = &delete_stack;
+	s->deleteStack = &deleteStack;
 	return s;
 }
