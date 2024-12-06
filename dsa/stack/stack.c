@@ -9,16 +9,17 @@ void push(stack *s, int val) {
 		// printf("In ");
 		int *temp = realloc(
 						s->arr,
-						sizeof(int) * (s->size * 2)
+						sizeof(int) * (s->capacity * 2)
 					);
 		if(temp == NULL) {
 			printf("Stack overflowed\n");
 			return;
 		}
 		s->arr = temp;
-		s->size = s->size * 2;
+		s->capacity *= 2;
 	}
-	s->arr[s->top++] = val; 
+	s->arr[s->top++] = val;
+	s->size = s->top;
 	return;
 }
 
@@ -56,7 +57,8 @@ void delete_stack(stack *s) {
 stack *make_stack() {
 	stack *s = malloc(sizeof(stack));
 	s->top = 0;
-	s->size = 8;
+	s->size = 0;
+	s->capacity = 8;
 	s->arr = malloc(sizeof(int) * 8);
 	s->push = &push;
 	s->pop = &pop;
@@ -64,4 +66,3 @@ stack *make_stack() {
 	s->delete_stack = &delete_stack;
 	return s;
 }
-
