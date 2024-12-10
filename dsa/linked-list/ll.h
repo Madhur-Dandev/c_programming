@@ -28,7 +28,7 @@ struct ll {
 		d_ll *d_tail;
 	};
 	void (*insertion)(ll *, int);
-	int (*deletion)(ll *);
+	int (*del_rear)(ll *);
 	int (*fetch)(ll *, int);
 	int (*search)(ll *, int);
 	int (*traverse)(ll *, int);
@@ -37,7 +37,7 @@ struct ll {
 
 ll *init_list(int);
 void insertion(ll *, int);
-int deletion(ll *);
+int del_rear(ll *);
 int fetch(ll *, int);
 int search(ll *, int);
 int traverse(ll *, int);

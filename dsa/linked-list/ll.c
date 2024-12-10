@@ -13,6 +13,7 @@ ll *init_list(int type) {
 		return NULL;
 	}
 
+
 	switch(type) {
 		case SGL:
 			l->s_tail = l->s_head = NULL; 
@@ -29,7 +30,7 @@ ll *init_list(int type) {
 
 	l->size = 0;
 	l->insertion = &insertion;
-	l->deletion = &deletion;
+	l->del_rear = &del_rear;
 	l->fetch = &fetch;
 	l->search = &search;
 	l->traverse = &traverse;
@@ -38,48 +39,49 @@ ll *init_list(int type) {
 }
 
 void insertion(ll *l, int val) {
-	if(l->type == SGL && l->s_head == NULL) {
-		l->s_head = (s_ll *) malloc(sizeof(s_ll));
-	}
-	if(l->type == DBL && l->d_head == NULL) {
-		l->d_head = (d_ll *) malloc(sizeof(d_ll));
-	}
-
-	if(l->type == SGL && l->s_head == NULL || 
-	   l->type == DBL && l->d_head == NULL) {
-		puts("Cannot create linked list at this moment.");
-		return;
-	}
-
 	void *temp;
+
 	if(l->type == SGL) {
 		temp = (s_ll *) malloc(sizeof(s_ll));
-		((s_ll *)temp)->next = NULL;
+	 	((s_ll *)temp)->next = NULL;
 	} else {
 		temp = (d_ll *) malloc(sizeof(d_ll));
 		((d_ll *)temp)->next = NULL;
 	}
 
-	
 	if(temp == NULL) {
 		puts("Unable to insertion data at this momemt.");
 		return; 
 	}
-
+	
 	if(l->type == SGL) {
-		l->s_tail->next = temp;
-		l->s_tail = (s_ll *) temp;
+		((s_ll *)temp)->val = val;
+		if(l->s_head == NULL) {
+			l->s_head = (s_ll *) temp;
+			l->s_head->next = NULL;
+			l->s_tail = l->s_head;
+		} else {
+			l->s_tail->next = (s_ll *) temp;
+			l->s_tail = (s_ll *) temp;
+		}
 	} else {
-		((d_ll *)temp)->prev = l->d_tail;
-		l->d_tail->next = (d_ll *) temp;
-		l->d_tail = (d_ll *) temp;
+		((d_ll *)temp)->val = val;
+		if(l->d_head == NULL) {
+			l->d_head = (d_ll *) temp;
+			l->d_head->next = NULL;
+			l->d_tail = l->d_tail;
+		} else {
+			((d_ll *)temp)->prev = l->d_tail;
+			l->d_tail->next = (d_ll *) temp;
+			l->d_tail = (d_ll *) temp;
+		}
 	}
 	l->size++;
 	puts("Data inserted.");
 	return;
 }
 
-int deletion(ll *l) {
+int del_rear(ll *l) {
 	if(l->size <= 0) {
 		printf("Nothing left to delete.\n");
 		return 0;
@@ -89,21 +91,26 @@ int deletion(ll *l) {
 
 	if(l->type == SGL) {
 		s_ll *temp = l->s_head;
-		val = temp->val;
-		if(l->s_head == l->s_tail) {
+		s_ll *to_free = l->s_tail;
+		/*if(l->s_head == l->s_tail) {
 			free(temp);
 			l->s_head = l->s_tail = NULL;
 			return val;
-		}
+		}*/
 
-		while(temp->next != l->s_tail) {
+		while(temp->next != l->s_tail && temp->next != NULL) {
 			temp = temp->next;
 		}
 
-		s_ll *to_free = l->s_tail;
+		if(l->s_head == l->s_tail) {
+			val = temp->val;
+			l->s_head = l->s_tail = NULL;
+		} else {
+			val = to_free->val;
+			temp->next = NULL;
+			l->s_tail = temp;
+		}
 		free(to_free);
-		temp->next = NULL;
-		l->s_tail = temp;
 		return val;
 	}
 
@@ -119,6 +126,7 @@ int deletion(ll *l) {
 	l->d_tail = temp->prev;
 	l->d_tail->next = NULL;
 	free(to_free);
+	l->size--;
 	return val;
 }
 
@@ -146,7 +154,6 @@ void destroy(ll *l) {
 
 	void *to_free;
 	while(temp != NULL) {
-		printf("Here\n");
 		to_free = temp;
 		if(l->type == SGL) {
 			temp = ((s_ll *)temp)->next;
