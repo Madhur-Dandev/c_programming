@@ -69,7 +69,7 @@ void insertion(ll *l, int val) {
 		if(l->d_head == NULL) {
 			l->d_head = (d_ll *) temp;
 			l->d_head->next = NULL;
-			l->d_tail = l->d_tail;
+			l->d_tail = l->d_head;
 		} else {
 			((d_ll *)temp)->prev = l->d_tail;
 			l->d_tail->next = (d_ll *) temp;
