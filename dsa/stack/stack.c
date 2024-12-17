@@ -1,69 +1,73 @@
 #include "stack.h"
 
 void push(stack *s, int val) {
-	/*if(s->top >= INT_MAX) {
-		printf("Stack overflowed\n");
-		return;
-	}*/
-	if(s->top >= s->capacity) {
-		// printf("In ");
-		int *temp = realloc(
-						s->arr,
-						sizeof(int) * (s->capacity * 2)
-					);
+	if(s->top >= s->max_capacity) {
+		// Dynamically resize stack when full.
+		int *temp = realloc(s->elements,	sizeof(int) * (s->max_capacity * 2));
 		if(temp == NULL) {
-			printf("Hey! Stack overflowed\n");
+			printf("Stack overflowed\n");
 			return;
 		}
-		s->arr = temp;
-		s->capacity *= 2;
+		s->elements = temp;
+		s->max_capacity *= 2;
 	}
-	s->arr[s->top++] = val;
+	s->elements[s->top++] = val;
 	return;
 }
 
 int pop(stack *s) {
 	if(s->top <= 0) {
-		printf("Nothing in stack.\n");
-		return 0; // expecting this is no 0 value in stack.
+		printf("Stack is empty.\n");
+		return INT_MIN; // Error code for empty stack.
 	}
 
-	int val = s->arr[--s->top];
+	int val = s->elements[--s->top];
 	return val;
 }
 
 int peek(stack *s) {
 	if(s->top <= 0) {
-		printf("Nothing in stack\n");
-		return 0; // expecting this is no 0 value in stack.
+		printf("Stack is empty\n");
+		return INT_MIN; // Error code for empty stack.
 	}
-	return s->arr[s->top];
+	return s->elements[s->top - 1];
 }
 
-bool isEmpty(stack *s) {
+bool is_empty(stack *s) {
 	return s->top <= 0;
 }
 
-void deleteStack(stack *s) {
-	if(s->arr == NULL) {
+void delete_stack(stack *s) {
+	if(s->elements == NULL) {
 		return;
 	}
 
-	free(s->arr);
+	free(s->elements);
 	s->top = 0;
 	free(s);
 	printf("Stack deleted\n");
 	return;
 }
 
-stack *makeStack() {
+stack *make_stack() {
 	stack *s = malloc(sizeof(stack));
+	if(s == NULL) {
+		printf("Unable to make stack\n\tMemory allocation failed\n");
+		return NULL;
+	}
 	s->top = 0;
-	s->capacity = 8;
-	s->arr = (int *) malloc(sizeof(int) * 8);
+	s->max_capacity = 8;
+	s->elements = (int *) malloc(sizeof(int) * 8);
+	if(s == NULL) {
+		printf("Unable to make stack\n\tMemory allocation failed\n");
+		return NULL;
+	}
+
+	// Assign function pointers
 	s->push = &push;
 	s->pop = &pop;
 	s->peek = &peek;
-	s->deleteStack = &deleteStack;
+	s->is_empty = &is_empty;
+	s->delete_stack = &delete_stack;
 	return s;
 }

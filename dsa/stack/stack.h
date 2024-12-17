@@ -8,22 +8,22 @@
 
 typedef struct stack stack;
 
+// define stack structure
 struct stack {
-	int top;
-	int size;
-	int capacity;
-	int *arr;
+	int top;			// Index of top element
+	int max_capacity;	// Maximum capacity of the stack	
+	int *elements;		// Pointer to stack elements
 	void (*push) (stack *, int);
 	int (*pop) (stack *);
 	int (*peek) (stack *);
-	bool (*isEmpty)(stack *);
-	void (*deleteStack) (stack *);
+	bool (*is_empty)(stack *);
+	void (*delete_stack) (stack *);
 };
 
 void push(stack *, int);
 int pop(stack *);
 int peek(stack *);
-bool isEmpty(stack *);
-void deleteStack(stack *);
-stack *makeStack(void);
+bool is_empty(stack *);
+void delete_stack(stack *);
+stack *make_stack(void);
 #endif
