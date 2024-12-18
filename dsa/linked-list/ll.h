@@ -5,6 +5,9 @@ typedef struct singly_ll s_ll;
 typedef struct doubly_ll d_ll;
 typedef struct ll ll;
 
+enum {SGL, DBL};
+enum {DEF, REV};
+
 struct singly_ll {
 	int val;
 	s_ll *next;
@@ -18,7 +21,6 @@ struct doubly_ll {
 
 struct ll {
 	int size;
-	enum {SGL, DBL} type;
 	union {
 		s_ll *s_head;
 		d_ll *d_head;
@@ -31,7 +33,7 @@ struct ll {
 	int (*del_rear)(ll *);
 	int (*fetch)(ll *, int);
 	int (*search)(ll *, int);
-	int (*traverse)(ll *, int);
+	void (*traverse)(ll *, int);
 	void (*destroy)(ll *);
 };
 
@@ -40,7 +42,9 @@ void insertion(ll *, int);
 int del_rear(ll *);
 int fetch(ll *, int);
 int search(ll *, int);
-int traverse(ll *, int);
+void traverse(ll *, int);
+void print_def(ll *);
+void print_rev(ll *);
 void destroy(ll *);
 
 #endif
