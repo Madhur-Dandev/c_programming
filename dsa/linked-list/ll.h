@@ -1,48 +1,75 @@
 #ifndef LLIST_T
 #define LLIST_T
 
-typedef struct singly_ll s_ll;
-typedef struct doubly_ll d_ll;
+typedef struct singly_node s_ll;
+typedef struct doubly_node d_ll;
 typedef struct ll ll;
 
-enum {SGL, DBL};
-enum {DEF, REV};
+// values for type of linked-list
+/*enum
+{
+	SGL, 		// singly linked-list
+	DBL  		// doubly linked-list
+};*/
 
-struct singly_ll {
-	int val;
-	s_ll *next;
+// values for flow of printing linked-list
+enum
+{
+	DEF, 		// default flow (straight)
+	REV  		// reverse flow
 };
 
-struct doubly_ll {
-	int val;
-	d_ll *prev;
-	d_ll *next;
+// structure for node of singly linked-list
+struct singly_node
+{
+	int32_t val;	// value of the node
+	s_ll *next; // address of the next node
 };
 
-struct ll {
-	int size;
-	union {
-		s_ll *s_head;
-		d_ll *d_head;
+// structure for node of doubly linked-list
+struct doubly_node
+{
+	int32_t val;	// value of the node
+	d_ll *prev; // address of the previous node
+	d_ll *next; // address of the next node
+};
+
+// common structure of linked-list,its operations and its data members
+struct ll
+{
+	int32_t size; // size of linked-list
+	union
+	{
+		s_ll *s_head; // singly linked-list head node
+		d_ll *d_head; // doubly linked-list head node
 	};
-	union {
-		s_ll *s_tail;
-		d_ll *d_tail;
+	union
+	{
+		s_ll *s_tail; // singly linked-list tail node
+		d_ll *d_tail; // doubly linked-list tail node
 	};
-	void (*insertion)(ll *, int);
-	int (*del_rear)(ll *);
-	int (*fetch)(ll *, int);
-	int (*search)(ll *, int);
-	void (*traverse)(ll *, int);
+	void (*insert_at_front)(ll *, int32_t);
+	void (*insert_at_index)(ll *, int32_t, int32_t);
+	void (*insert_at_end)(ll *, int32_t);
+	int32_t (*delete_from_front)(ll *);
+	int32_t (*delete_from_index)(ll *, int32_t);
+	int32_t (*delete_from_end)(ll *);
+	int32_t (*fetch)(ll *, int32_t);
+	int32_t (*search)(ll *, int32_t);
+	void (*print_list)(ll *, int32_t);
 	void (*destroy)(ll *);
 };
 
-ll *init_list(int);
-void insertion(ll *, int);
-int del_rear(ll *);
-int fetch(ll *, int);
-int search(ll *, int);
-void traverse(ll *, int);
+ll *init_list(int32_t);
+void insert_at_front(ll *, int32_t);
+void insert_at_index(ll *, int32_t, int32_t);
+void insert_at_end(ll *, int32_t);
+int32_t delete_from_front(ll *);
+int32_t delete_from_index(ll *, int32_t);
+int32_t delete_from_end(ll *);
+int32_t fetch(ll *, int32_t);
+int32_t search(ll *, int32_t);
+void print_list(ll *, int32_t);
 void print_def(ll *);
 void print_rev(ll *);
 void destroy(ll *);
