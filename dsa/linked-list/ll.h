@@ -70,6 +70,7 @@ int32_t delete_from_end(ll *);
 int32_t fetch(ll *, int32_t);
 int32_t search(ll *, int32_t);
 void print_list(ll *, int32_t);
+void print_singly_def(s_ll *);
 void print_def(ll *);
 void print_rev(ll *);
 void destroy(ll *);
