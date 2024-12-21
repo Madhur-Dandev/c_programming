@@ -60,7 +60,7 @@ struct ll
 	void (*destroy)(ll *);
 };
 
-ll *init_list(int32_t);
+ll *init_list();
 void insert_at_front(ll *, int32_t);
 void insert_at_index(ll *, int32_t, int32_t);
 void insert_at_end(ll *, int32_t);
