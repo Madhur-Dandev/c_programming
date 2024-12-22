@@ -5,13 +5,6 @@ typedef struct singly_node s_ll;
 typedef struct doubly_node d_ll;
 typedef struct ll ll;
 
-// values for type of linked-list
-/*enum
-{
-	SGL, 		// singly linked-list
-	DBL  		// doubly linked-list
-};*/
-
 // values for flow of printing linked-list
 enum
 {

@@ -41,7 +41,6 @@ ll *init_list()
 	return l;
 }
 
-
 // insertion section - contains all the functions
 // for insertion. These function do not return anything.
 // ------------------------Start------------------------
@@ -49,7 +48,7 @@ void insert_at_front(ll *l, int32_t val)
 {
 	/* First initialize the temp and head variable.
 	 * temp - for newly created node of list.
-	 * head - for checking the head of either 
+	 * head - for checking the head of either
 	 *		  singly or doubly is null or not.
 	 */
 #ifdef SGL
@@ -107,7 +106,7 @@ void insert_at_index(ll *l, int32_t val, int32_t index)
 	 *    if it is 0 then call the insert_at_front.
 	 * 3. third if for checking if the index is last
 	 *    index value, if it is then call insert_at_end
-	 * 
+	 *
 	 * Additional logic for inserting at given index
 	 * requires to traverse to the index - 1 node and
 	 * then adjusting the pointers depending on the
@@ -223,8 +222,6 @@ void insert_at_end(ll *l, int32_t val)
 }
 // -------------------------End--------------------------
 
-
-
 // deletion section - contains all the functions
 // for deletion. These function return the value
 // contained by the deleted node.
@@ -251,15 +248,19 @@ int32_t delete_from_front(ll *l)
 #ifdef SGL
 	s_ll *to_free = l->s_head;
 	l->s_head = l->s_head->next;
-	if(l->s_head == NULL) {
+	if (l->s_head == NULL)
+	{
 		l->s_head = l->s_tail = NULL;
 	}
 #elif defined(DBL)
 	d_ll *to_free = l->d_head;
 	l->d_head = l->d_head->next;
-	if(l->d_head == NULL) {
+	if (l->d_head == NULL)
+	{
 		l->d_head = l->d_tail = NULL;
-	} else {
+	}
+	else
+	{
 		l->d_head->prev = NULL;
 	}
 #endif
@@ -335,7 +336,8 @@ int32_t delete_from_end(ll *l)
 		return 0;
 	}
 
-	if(l->size <= 1) {
+	if (l->size <= 1)
+	{
 		return delete_from_front(l);
 	}
 
@@ -344,8 +346,9 @@ int32_t delete_from_end(ll *l)
 	s_ll *to_free;
 	s_ll *head = l->s_head;
 	int32_t counter = 1;
-	while(head != NULL) {
-		if(counter == l->size-1)
+	while (head != NULL)
+	{
+		if (counter == l->size - 1)
 			break;
 		head = head->next;
 		counter++;
@@ -366,7 +369,6 @@ int32_t delete_from_end(ll *l)
 }
 // -------------------------End-------------------------
 
-
 int32_t fetch(ll *l, int32_t index)
 {
 	/* fetch function fetch the value hold by
@@ -379,7 +381,6 @@ int32_t fetch(ll *l, int32_t index)
 		return 0;
 	}
 
-
 // node variable for temporarily holding the address
 // of nodes as we progresses in loop and which will
 // also hold the address of node at index position.
@@ -389,34 +390,45 @@ int32_t fetch(ll *l, int32_t index)
 	d_ll *node = l->d_head;
 #endif
 
-	if(index == l->size - 1)
+
+
+	if (index == l->size - 1)
 	{
+		// if the index is size - 1 then return the tail node.
 #ifdef SGL
-		node = l->s_tail;		
+		node = l->s_tail;
 #elif defined(DBL)
 		node = l->d_tail;
 #endif
 	}
 
-	if(index > 0 && index < l->size - 1)
+	if (index > 0 && index < l->size - 1)
 	{
-		int32_t counter = 0;	// for counting position as we progresses in loop.
-		while(node != NULL)
+		// if the index is anything between 0 and size - 1
+		// then, traverse through the list till index position.
+		int32_t counter = 0; // for counting position as we progresses in loop.
+		while (node != NULL)
 		{
 			if (counter == index)
 			{
-				break;	
+				break;
 			}
 			node = node->next;
 			counter++;
 		}
 	}
 
+	// if no if statement works then it simply means index is 0
+	// then, simpley return the head node.
 	return node->val;
 }
 
 int32_t search(ll *l, int32_t val)
 {
+	/* search function checks the val of every node
+	 * then compare it to the value provided by user
+	 * it return the index position of fist occurence.
+	 */
 	if (l->size <= 0)
 	{
 		printf("Nothing in the linked list.\n");
@@ -447,6 +459,9 @@ int32_t search(ll *l, int32_t val)
 
 void print_list(ll *l, int32_t flow)
 {
+	/* the flow parameter is use to decide the flow of traversing
+	 * depending on the flow the printing will happen.
+	 */
 	switch (flow)
 	{
 	case DEF:
@@ -456,13 +471,17 @@ void print_list(ll *l, int32_t flow)
 		print_rev(l);
 		break;
 	default:
+		puts("Choose the correct flow -\n\tDEF for default/straight flow\n\tREV for reverse flow.");
 		return;
 	}
 	return;
 }
 
-void print_singly_def(s_ll *node) {
-	if(node != NULL) {
+void print_singly_def(s_ll *node)
+{
+	// for printing singly lined-list in reverse without extra logic.
+	if (node != NULL)
+	{
 		print_singly_def(node->next);
 		printf("%d\n", node->val);
 	}
@@ -508,6 +527,9 @@ void print_rev(ll *l)
 
 void destroy(ll *l)
 {
+	/* First free the remaining list which is not freed.
+	 * Then, free the list object.
+	 */
 	if (l == NULL)
 		return;
 
