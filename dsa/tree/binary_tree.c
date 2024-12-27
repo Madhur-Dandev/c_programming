@@ -1,187 +1,240 @@
-/* This file contains some basic functions
- * of binary tree like (insertion, deletion,
- * get size, get height)
- */
-
 #include <stdio.h>
-#include "btree.h"
+#include <stdlib.h>
+#include <math.h>
+#include "binary_tree.h"
 
-/*int main(void) {
-	node *root = NULL;
-	insert(&root, 1);
-	insert(&root, 2);
-	insert(&root, 3);
-	printf("%d\n", root->left->data);
-	insert(&root, 4);
-	insert(&root, 5);
-	insert(&root, 6);
-	insert(&root, 7);
-	insert(&root, 8);
-	insert(&root, 9);
-	insert(&root, 10);
-	insert(&root, 11);
-	insert(&root, 12);
-	insert(&root, 13);
-	insert(&root, 14);
-	insert(&root, 15);
-	insert(&root, 16);
-	insert(&root, 17);
-	insert(&root, 18);
-	insert(&root, 19);
-	insert(&root, 20);
-	levelorder(root);
-	insert(&root, 5);
-	insert(&root, 6);
-	insert(&root, 10);
-	insert(&root, 1);
-	insert(&root, 2);
-	insert(&root, 200);
-	insert(&root, -19);
-	preorder(root);
-	puts("");
-	inorder(root);
-	puts("\nPost order");
-	postorder(root);
-	puts("");
-	preorder_no_recurr(root);
-	postorder_no_recurr(root);
-	puts("");
-	levelorder(root);
-	puts("");
-	int res = max(root);
-	printf("%d\n", res);
-	res = min(root);
-	printf("%d\n", res);
-	res = max_no_recc(root);
-	printf("%d\n", res);
-	res = min_no_recc(root);
-	printf("%d\n", res);
-	node *result = search(root, 2);
-	printf("%p\n", result);
-	printf("%d\n", size(root));
-	reverse_levelorder(root);
-	puts("");
-	printf("%d\n", get_height(root, 0));
-	return 0;
-} */
+// struct tracker tracker;
 
-int insert(node **root, int val) {
-	lln *temp = NULL;
-	lln *queue, *tail;
-	node *parent = NULL;
-
-	node *new_n = (node *) malloc(sizeof(node));
-	new_n->data = val;
-	new_n->left = new_n->right = NULL;
-	if(*root == NULL) {
-		*root = new_n;
+tree *init_tree(void) {
+	tree *t = (tree *) malloc(sizeof(tree));
+	if(t == NULL) {
+		puts("Unable to created tree. Allocation failed.");
+		return NULL;
 	}
-	else {
-		tail = queue = (lln *) malloc(sizeof(lln));
-		queue->data_node = *root;
-		queue->next = NULL;
-		while(queue != NULL) {
-			temp = queue;
-			if(temp->data_node->left == NULL ||
-			   temp->data_node->right == NULL)
-				break;
-
-			if(temp->data_node->left != NULL) {
-				lln *temp1 = (lln *)malloc(sizeof(lln));
-				temp1->data_node = temp->data_node->left;
-				temp1->next = NULL;
-				tail->next = temp1;
-				tail = tail->next;
-				if(tail->data_node->right != NULL) {
-					temp1 = (lln *) malloc(sizeof(lln));
-					temp1->data_node = temp->data_node->right;
-					temp1->next = NULL;
-					tail->next = temp1;
-					tail = tail->next;
-				}
-			}
-
-			queue = queue->next;
-			free(temp);
-		}
-
-		parent = temp->data_node;
-
-		while(queue) {
-			temp = queue;
-			queue = queue->next;
-			free(temp);
-		}
-
-	    if(parent->left == NULL)
-		    parent->left = new_n;
-		else
-			parent->right = new_n;
-	}
-
-	return 1;
+	t->binary_tree = NULL;
+	t->insert_node = &insert_node;
+	t->delete_node = &delete_node;
+	t->destroy = &destroy;
+	return t;
 }
 
-int delete(node **root) {
-	struct del_ds *queue, *tail, *temp;
-	node *to_free;
-	queue = tail = (struct del_ds *) malloc(sizeof(struct del_ds));
-	queue->data_node = *root;
-	queue->next = NULL;
-	queue->parent = NULL;
-
-	while(queue) {
-		temp = queue;
-		if(temp->data_node->left == NULL &&
-		   temp->data_node->right == NULL)
-			break;
-
-		if(temp->data_node->left != NULL) {
-			struct del_ds *temp1 = (struct del_ds *)malloc(sizeof(struct del_ds));
-			temp1->data_node = temp->data_node->left;
-			temp1->parent = temp->data_node;
-			temp1->next = NULL;
-			tail->next = temp1;
-			tail = tail->next;
-			if(tail->data_node->right != NULL) {
-				temp1 = (struct del_ds *) malloc(sizeof(struct del_ds));
-				temp1->data_node = temp->data_node->right;
-				temp1->parent = temp->data_node;
-				temp1->next = NULL;
-				tail->next = temp1;
-				tail = tail->next;
-			}
-		}
-
-		queue = queue->next;
-		free(temp);
+//node *find_node(node *n, int32_t level, int32_t type, tracker *t) {
+node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *level, int32_t side) {
+	if(n == NULL) {
+		return NULL;
 	}
 
-	if(tail->parent == NULL) {
-		to_free = *root;
-		free(to_free);
-		*root = NULL;
+	int32_t left_size_current = 0;
+	int32_t right_size_current = 0;
+	int32_t level_current_left = 0;
+	int32_t level_current_right = 0;
+	node *to_return = NULL;
+
+	node *left = find_node(n->left, &left_size_current, &left_size_current, &level_current_left, LEFT);
+	node *right = find_node(n->right, &right_size_current, &right_size_current, &level_current_right, RIGHT);
+	
+	if(right == NULL) {
+		to_return = n;
 	}
 	else {
-		node *parent = tail->parent;
-		if(parent->right != NULL) {
-			to_free = parent->right;
-			free(to_free);
-			parent->right = NULL;
+		int32_t max_subtree_elem;
+		if(level_current_left > level_current_right) {
+			max_subtree_elem = (int32_t) ((pow(2, level_current_left + 1) - 2) / 2);
 		}
 		else {
-			to_free = parent->left;
-			free(to_free);
-			parent->left = NULL;
+			max_subtree_elem = (int32_t) ((pow(2, level_current_right + 1) - 2) / 2);
+		}
+
+		if(left_size_current == right_size_current) {	
+			to_return = left;
+		}
+		else {
+			if(left_size_current < max_subtree_elem) {
+				to_return = left;
+			}
+			else {
+				to_return = right;
+			}
 		}
 	}
 
-	struct del_ds *queue_free;
-	while(queue) {
-		queue_free = queue;
-		queue = queue->next;
-		free(queue_free);
-	}
+	(*left_size) += left_size_current;
+	(*right_size) += right_size_current;
+	if(side == LEFT)
+		(*left_size) += 1;
+	if(side == RIGHT)
+		(*right_size) += 1;
+	(*level) = (level_current_left > level_current_right
+			   ? level_current_left
+			   : level_current_right) + 1;
 
+	return to_return;
+}
+
+void insert_node(tree *t, int32_t value) {
+	node *n = (node *) malloc(sizeof(node));
+	if(n == NULL) {
+		puts("Cannot insert node");
+		return;
+	}
+	
+	n->val = value;
+	n->left = n->right = NULL;
+	
+	if(t->binary_tree == NULL) {
+		puts("root");
+		t->binary_tree = n;
+		return;
+	}
+	
+	//tracker trac = {0, 0};
+	//node *target_node = find_node(t->binary_tree, 0, ROOT, &trac);
+	int32_t left_size, right_size, level;
+	left_size = right_size = level = 0;
+	node *target_node = find_node(t->binary_tree, &left_size, &right_size, &level, ROOT);
+	printf("%d %d %d\n", target_node->val, left_size, right_size);
+	if(target_node->left == NULL)
+		target_node->left = n;
+	else
+		target_node->right = n;
+
+	//trac.left = trac.right = 0;
+	return;
+}
+
+int32_t delete_node(tree *t) {
 	return 0;
 }
+
+void preorder(node *n) {
+	if(n == NULL)
+		return;
+
+	printf("%d\n", n->val);
+	preorder(n->left);
+	preorder(n->right);
+}
+
+void inorder(node *n) {
+	if(n == NULL)
+		return;
+
+	inorder(n->left);
+	printf("%d\n", n->val);
+	inorder(n->right);
+}
+
+void postorder(node *n) {
+	if(n == NULL)
+		return;
+
+	postorder(n->left);
+	postorder(n->right);
+	printf("%d\n", n->val);
+}
+
+void destroy_tree(node *n) {
+	if(n == NULL)
+		return;
+	
+	destroy_tree(n->left);
+	destroy_tree(n->right);
+	
+	node *to_free;
+	if(n->left != NULL) {
+		to_free = n->left;
+		free(to_free);
+	}
+
+	if(n->right != NULL) {
+		to_free = n->right;
+		free(to_free);
+	}
+	return;
+}
+
+void destroy(tree *t) {
+	destroy_tree(t->binary_tree);
+	t->binary_tree = NULL;
+	free(t);
+	puts("Tree Destroyed.");
+	return;
+}
+
+/*node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *level) {
+	if(n == NULL) {
+		return NULL;
+	}
+
+	int32_t left_size_current = 0;
+	int32_t right_size_current = 0;
+	int32_t level_current_left = 0;
+	int32_t level_current_right = 0;
+	node *to_return = NULL;
+
+	node *left = find_node(n->left, &left_size_current, &left_size_current, &level_current_left);
+	node *right = find_node(n->right, &right_size_current, &right_size_current, &level_current_right);
+	
+	if(right == NULL) {
+		to_return = n;
+	}
+	else {
+		int32_t max_subtree_elem;
+		if(level_current_left > level_current_right) {
+			max_subtree_elem = (int32_t) ((pow(2, level_current_left + 1) - 2) / 2);
+		}
+		else {
+			max_subtree_elem = (int32_t) ((pow(2, level_current_right + 1) - 2) / 2);
+		}
+
+		if(left_size_current < max_subtree_elem) {
+			to_return = left;
+		}
+		else {
+			to_return = right;
+		}
+	}
+
+	(*left_size) += (left_size_current + 1);
+	(*right_size) += (right_size_current + 1);
+	(*level) = (level_current_left > level_current_right
+			   ? level_current_left
+			   : level_current_right) + 1;
+
+	return NULL;
+}*/
+
+/*node *left = find_node(n->left, level+1, LEFT, t);
+	node *right = find_node(n->right, level+1, RIGHT, t);
+
+	if(left == NULL && right == NULL) {
+		if(t->left > level) {
+			t->right = level;
+		} else {
+			if(type == LEFT)
+				t->left = level;
+			if(type == RIGHT)
+				t->right = level;
+		}
+		return n;
+	} else if(left != NULL && right == NULL) {
+		if(t->left > level) {
+			t->right = level;
+		} else {
+			if(type == LEFT)
+				t->left = level;
+			if(type == RIGHT)
+				t->right = level;
+		}
+		return n;
+	}
+	else {
+		if(t->left == t->right) {
+			return left;
+		}
+		if(t->left > t->right) {	
+			return right;
+		}
+	}*/
+
+
