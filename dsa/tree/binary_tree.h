@@ -39,10 +39,9 @@ struct tree {
 };
 
 tree *init_tree(void);
-//node *find_node(node *, int32_t, int32_t, tracker *);
 node *find_node(node *, int32_t *, int32_t *, int32_t *, int32_t);
-//node *search_through_list(node *);
 void insert_node(tree *, int32_t);
+node *find_parent_node(node *, int32_t *, int32_t *, int32_t *, int32_t);
 int32_t delete_node(tree *);
 void preorder(node *);
 void inorder(node *);

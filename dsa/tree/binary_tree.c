@@ -18,7 +18,6 @@ tree *init_tree(void) {
 	return t;
 }
 
-//node *find_node(node *n, int32_t level, int32_t type, tracker *t) {
 node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *level, int32_t side) {
 	if(n == NULL) {
 		return NULL;
@@ -82,28 +81,95 @@ void insert_node(tree *t, int32_t value) {
 	n->left = n->right = NULL;
 	
 	if(t->binary_tree == NULL) {
-		puts("root");
 		t->binary_tree = n;
 		return;
 	}
 	
-	//tracker trac = {0, 0};
-	//node *target_node = find_node(t->binary_tree, 0, ROOT, &trac);
 	int32_t left_size, right_size, level;
 	left_size = right_size = level = 0;
 	node *target_node = find_node(t->binary_tree, &left_size, &right_size, &level, ROOT);
-	printf("%d %d %d\n", target_node->val, left_size, right_size);
+	//printf("%d %d %d\n", target_node->val, left_size, right_size);
 	if(target_node->left == NULL)
 		target_node->left = n;
 	else
 		target_node->right = n;
 
-	//trac.left = trac.right = 0;
 	return;
 }
 
+node *find_parent_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *level, int32_t side) {
+	if(n == NULL) {
+		return NULL;
+	}
+
+	int32_t left_size_current = 0;
+	int32_t right_size_current = 0;
+	int32_t level_current_left = 0;
+	int32_t level_current_right = 0;
+
+	node *to_return = NULL;
+
+	node *left = find_parent_node(n->left, &left_size_current, &left_size_current, &level_current_left, LEFT);
+	node *right = find_parent_node(n->right, &right_size_current, &right_size_current, &level_current_right, RIGHT);
+	
+	if(right == NULL) {
+		to_return = n;
+	}
+	else {
+		if(left_size_current == 1 && right_size_current == 1) {
+			to_return = n;
+		}
+		else if(left_size_current == right_size_current) {	
+			to_return = right;
+		}
+		else {
+			if(((((int32_t)pow(2, level_current_left + 1) / 2) - 1) - (((int32_t) pow(2, level_current_left)/2))) < right_size_current) {
+				to_return = right;
+			}
+			else {
+				to_return = left;
+			}
+		}
+	}
+
+	(*left_size) += left_size_current;
+	(*right_size) += right_size_current;
+	if(side == LEFT)
+		(*left_size) += 1;
+	if(side == RIGHT)
+		(*right_size) += 1;
+	(*level) = level_current_left + 1;
+
+	return to_return;
+}
+
 int32_t delete_node(tree *t) {
-	return 0;
+	int32_t return_val = 0;
+	int32_t left_size = 0;
+	int32_t right_size = 0;
+	int32_t level = 0;
+	node *target_node = find_parent_node(t->binary_tree, &left_size, &right_size, &level, ROOT);
+
+	if(target_node != NULL) {
+		node *to_free = NULL;
+		if(target_node->right != NULL) {
+			to_free = target_node->right;
+			target_node->right = NULL;
+		}
+		else if(target_node->left != NULL) {
+			to_free = target_node->left;
+			target_node->left = NULL;
+		}
+		else {
+			to_free = target_node;
+			t->binary_tree = NULL;
+		}
+
+		return_val = to_free->val;
+
+		free(to_free);
+	}
+	return return_val;
 }
 
 void preorder(node *n) {
