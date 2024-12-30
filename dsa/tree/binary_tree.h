@@ -33,6 +33,7 @@ struct tree_node_list {
 
 struct tree {
 	node *binary_tree;
+	int32_t height;
 	void (*insert_node) (tree *, int32_t);
 	int32_t (*delete_node) (tree *);
 	void (*destroy) (tree *);
@@ -46,6 +47,9 @@ int32_t delete_node(tree *);
 void preorder(node *);
 void inorder(node *);
 void postorder(node *);
+void level_order(tree *);
+int32_t find_smallest(node *);
+int32_t find_largest(node *);
 void destroy_tree(node *);
 void destroy(tree *);
 
