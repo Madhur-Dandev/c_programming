@@ -15,25 +15,23 @@ enum {
 	RIGHT = 1	// right node
 };
 
+// node of a tree
 struct tree_node {
-	int32_t val;
-	node *left;
-	node *right;
+	int32_t val;	// value of the node
+	node *left;		// address of left subtree/node
+	node *right;	// addrress of right subtree/node
 };
 
-struct tracker {
-	int32_t left;
-	int32_t right;
-};
-
+// for making queue for level-order operations
 struct tree_node_list {
-	node *n;
-	list *next;
+	node *n;	// address of the node in queue
+	list *next;	// address of next queue element.
 };
 
+// tree struct for efficiently managing tree resources.
 struct tree {
-	node *binary_tree;
-	int32_t height;
+	node *binary_tree;						// address of root node of tree
+	int32_t height;							// current height of tree
 	void (*insert_node) (tree *, int32_t);
 	int32_t (*delete_node) (tree *);
 	void (*destroy) (tree *);
@@ -50,6 +48,7 @@ void postorder(node *);
 void level_order(tree *);
 int32_t find_smallest(node *);
 int32_t find_largest(node *);
+node *search(tree *, int32_t);
 void destroy_tree(node *);
 void destroy(tree *);
 
