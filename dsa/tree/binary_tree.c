@@ -21,23 +21,33 @@ tree *init_tree(void) {
 }
 
 node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *height, int32_t side) {
+	/* recursive function for finding parent node for child 
+	 * node insertion. This function find the parent node
+	 * level-order wise.
+	 */
+	
 	if(n == NULL) {
 		return NULL;
 	}
 
-	int32_t left_size_current = 0;
-	int32_t right_size_current = 0;
-	int32_t height_current_left = 0;
-	int32_t height_current_right = 0;
-	node *to_return = NULL;
+	int32_t left_size_current = 0;		// variable for getting size of left subtree
+	int32_t right_size_current = 0;		// variable for getting size of right subtree
+	int32_t height_current_left = 0;	// variable for getting height of left subtree
+	int32_t height_current_right = 0;	// variable for getting height of right subtree
+	node *to_return = NULL;				// address to return
 
-	node *left = find_node(n->left, &left_size_current, &left_size_current, &height_current_left, LEFT);
-	node *right = find_node(n->right, &right_size_current, &right_size_current, &height_current_right, RIGHT);
+	node *left = find_node(n->left, &left_size_current, &left_size_current, &height_current_left, LEFT); // recurse down left
+	node *right = find_node(n->right, &right_size_current, &right_size_current, &height_current_right, RIGHT); // recurse down right
 	
 	if(right == NULL) {
 		to_return = n;
 	}
 	else {
+		/* It will check which side to choose based on:
+		 * if the both sides have same weight then choose left,
+		 * if left is less than right then left or else right
+		 * vice versa of second if.
+		 */
 		int32_t max_subtree_elem;
 		if(height_current_left > height_current_right) {
 			max_subtree_elem = (int32_t) ((pow(2, height_current_left + 1) - 2) / 2);
@@ -59,12 +69,19 @@ node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *heigh
 		}
 	}
 
+	// this section is to update the value of parent variable
+	// with the current child data.
 	(*left_size) += left_size_current;
 	(*right_size) += right_size_current;
+
+	// this will ensure than weight is added twice by left
+	// and right child
 	if(side == LEFT)
 		(*left_size) += 1;
 	if(side == RIGHT)
 		(*right_size) += 1;
+
+	// choose greater then add 1 to original parent height
 	(*height) = (height_current_left > height_current_right
 			   ? height_current_left
 			   : height_current_right) + 1;
@@ -90,7 +107,6 @@ void insert_node(tree *t, int32_t value) {
 	int32_t left_size, right_size, height;
 	left_size = right_size = height = 0;
 	node *target_node = find_node(t->binary_tree, &left_size, &right_size, &height, ROOT);
-	//printf("%d %d %d\n", target_node->val, left_size, right_size);
 	if(height > t->height)
 		t->height = height;
 
@@ -103,6 +119,10 @@ void insert_node(tree *t, int32_t value) {
 }
 
 node *find_parent_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *height, int32_t side) {
+	/* Same as the function use to find the parent element for
+	 * insertion, but uses a differnt formula when choosing 
+	 * between left or right side.
+	 */
 	if(n == NULL) {
 		return NULL;
 	}
@@ -121,6 +141,15 @@ node *find_parent_node(node *n, int32_t *left_size, int32_t *right_size, int32_t
 		to_return = n;
 	}
 	else {
+		/* if both left and right side weight is 1, then
+		 * return current element
+		 * if both sides are equal bu does not weigh 1, then
+		 * return right
+		 * if nothing works then use this formula to choose
+		 * sides: (2^(max_height+1)/2) - ((2^max_height)/2)
+		 * if the right side is less than or equal to the
+		 * formula then choose left or else right
+		 */
 		if(left_size_current == 1 && right_size_current == 1) {
 			to_return = n;
 		}
@@ -209,6 +238,10 @@ void postorder(node *n) {
 }
 
 void level_order_main(node *n, int32_t height) {
+	/* This function is recurse down until the height is 1
+	 * when height reaches to 1 then print the value of the
+	 * current node.
+	 */
 	if(n == NULL)
 		return;
 
@@ -216,12 +249,14 @@ void level_order_main(node *n, int32_t height) {
 		printf("%d\n", n->val);
 	}
 	else {
+		// as goes down deeper decrement the height by 1 in each step on both the side.
 		level_order_main(n->left, height - 1);
 		level_order_main(n->right, height - 1);
 	}
 }
 
 void level_order(tree *t) {
+	// It has to invoke for each level to print.
 	for(int i = 1; i <= t->height; i++) {
 		level_order_main(t->binary_tree, i);
 	}
@@ -257,6 +292,25 @@ int32_t find_largest(node *n) {
 		   : (right > n->val
 		   	  ? right
 			  : n->val);
+}
+
+node *search_main(node *n, int32_t val) {
+	if(n == NULL) {
+		return NULL;
+	}
+
+	if(n->val == val) {
+		return n;
+	}
+
+	node *left = search_main(n->left, val);
+	node *right = search_main(n->right, val);
+
+	return left != NULL ? left : right;
+}
+
+node *search(tree *t, int32_t val) {
+	return search_main(t->binary_tree, val);
 }
 
 void destroy_tree(node *n) {
