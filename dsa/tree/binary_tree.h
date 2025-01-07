@@ -7,6 +7,7 @@ typedef struct tree_node node;
 typedef struct tracker tracker;
 typedef struct tree_node_list list;
 typedef struct tree tree;
+typedef struct path_node path_node;
 
 // values for determining sides of tree node
 enum {
@@ -35,6 +36,12 @@ struct tree {
 	void (*insert_node) (tree *, int32_t);
 	int32_t (*delete_node) (tree *);
 	void (*destroy) (tree *);
+	path_node *(*find_path) (tree *, int32_t);
+};
+
+struct path_node {
+	char position;
+	path_node *next;
 };
 
 tree *init_tree(void);
@@ -49,6 +56,7 @@ void level_order(tree *);
 int32_t find_smallest(node *);
 int32_t find_largest(node *);
 node *search(tree *, int32_t);
+path_node *find_path(tree *, int32_t);
 void destroy_tree(node *);
 void destroy(tree *);
 

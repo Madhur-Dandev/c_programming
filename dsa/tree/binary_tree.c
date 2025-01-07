@@ -16,6 +16,7 @@ tree *init_tree(void) {
 	t->binary_tree = NULL;
 	t->insert_node = &insert_node;
 	t->delete_node = &delete_node;
+	t->find_path = &find_path;
 	t->destroy = &destroy;
 	return t;
 }
@@ -311,6 +312,44 @@ node *search_main(node *n, int32_t val) {
 
 node *search(tree *t, int32_t val) {
 	return search_main(t->binary_tree, val);
+}
+
+path_node *make_path_node(path_node *prev, int32_t side) {
+	path_node *p = (path_node *) malloc(sizeof(path_node));		
+	p->position = side == LEFT
+				  ? 'L'
+				  : side == RIGHT
+				  	? 'R'
+					: '-';
+	p->next = prev;
+	return p;
+
+}
+
+path_node *find_path_main(node *n, int32_t val, int32_t side) {
+	if(n == NULL)
+		return NULL;
+
+	if(n->val == val) {
+		return make_path_node(NULL, side);
+	}
+	
+	path_node *left = find_path_main(n->left, val, LEFT);
+	path_node *right = find_path_main(n->right, val, RIGHT);
+	
+	if(left != NULL) {
+		return make_path_node(left, side);
+	}
+	else if(left == NULL && right != NULL) {
+		return make_path_node(right, side);
+	}
+	else {
+		return NULL;
+	}	
+}
+
+path_node *find_path(tree *t, int32_t val) {
+	return find_path_main(t->binary_tree, val, ROOT);
 }
 
 void destroy_tree(node *n) {
