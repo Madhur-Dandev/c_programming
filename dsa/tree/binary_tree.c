@@ -327,6 +327,15 @@ path_node *make_path_node(path_node *prev, int32_t side) {
 }
 
 path_node *find_path_main(node *n, int32_t val, int32_t side) {
+	/* If will recurse down in tree and check for the node
+	 * if found it traverse back while making a singly
+	 * linked-list of path direction from the root node.
+	 * The past direction will tell: '-': root, 'L': left,
+	 * 'R': right
+	 * These function is baised toward left. Means if both
+	 * sides have the same element then the algoithm will
+	 * only choose left.
+	 */
 	if(n == NULL)
 		return NULL;
 
@@ -338,6 +347,15 @@ path_node *find_path_main(node *n, int32_t val, int32_t side) {
 	path_node *right = find_path_main(n->right, val, RIGHT);
 	
 	if(left != NULL) {
+		if(right != NULL) {
+			// free up the memory of right list
+			path_node *temp = right, *to_free;
+			while(temp != NULL) {
+				to_free = temp;
+				temp = temp->next;
+				free(to_free);
+			}
+		}
 		return make_path_node(left, side);
 	}
 	else if(left == NULL && right != NULL) {
@@ -349,6 +367,7 @@ path_node *find_path_main(node *n, int32_t val, int32_t side) {
 }
 
 path_node *find_path(tree *t, int32_t val) {
+	// This algorithm is baised towards left side search 
 	return find_path_main(t->binary_tree, val, ROOT);
 }
 
