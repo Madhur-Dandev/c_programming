@@ -1,10 +1,13 @@
 #include "stack.h"
 
-void push(stack *s, int val) {
-	if(s->top >= s->max_capacity) {
+void push(stack *s, int val)
+{
+	if (s->top >= s->max_capacity)
+	{
 		// Dynamically resize stack when full.
-		int *temp = realloc(s->elements,	sizeof(int) * (s->max_capacity * 2));
-		if(temp == NULL) {
+		int *temp = realloc(s->elements, sizeof(int) * (s->max_capacity * 2));
+		if (temp == NULL)
+		{
 			printf("Stack overflowed\n");
 			return;
 		}
@@ -15,8 +18,10 @@ void push(stack *s, int val) {
 	return;
 }
 
-int pop(stack *s) {
-	if(s->top <= 0) {
+int pop(stack *s)
+{
+	if (s->top <= 0)
+	{
 		printf("Stack is empty.\n");
 		return INT_MIN; // Error code for empty stack.
 	}
@@ -25,20 +30,25 @@ int pop(stack *s) {
 	return val;
 }
 
-int peek(stack *s) {
-	if(s->top <= 0) {
+int peek(stack *s)
+{
+	if (s->top <= 0)
+	{
 		printf("Stack is empty\n");
 		return INT_MIN; // Error code for empty stack.
 	}
 	return s->elements[s->top - 1];
 }
 
-bool is_empty(stack *s) {
+bool is_empty(stack *s)
+{
 	return s->top <= 0;
 }
 
-void delete_stack(stack *s) {
-	if(s->elements == NULL) {
+void delete_stack(stack *s)
+{
+	if (s->elements == NULL)
+	{
 		return;
 	}
 
@@ -49,16 +59,19 @@ void delete_stack(stack *s) {
 	return;
 }
 
-stack *make_stack() {
+stack *make_stack()
+{
 	stack *s = malloc(sizeof(stack));
-	if(s == NULL) {
+	if (s == NULL)
+	{
 		printf("Unable to make stack\n\tMemory allocation failed\n");
 		return NULL;
 	}
 	s->top = 0;
 	s->max_capacity = 8;
-	s->elements = (int *) malloc(sizeof(int) * 8);
-	if(s == NULL) {
+	s->elements = (int *)malloc(sizeof(int) * 8);
+	if (s == NULL)
+	{
 		printf("Unable to make stack\n\tMemory allocation failed\n");
 		return NULL;
 	}

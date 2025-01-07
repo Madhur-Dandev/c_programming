@@ -4,7 +4,8 @@
 
 typedef struct queue queue;
 
-struct queue {
+struct queue
+{
 	int size;
 	int capacity;
 	int front;

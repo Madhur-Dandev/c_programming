@@ -9,29 +9,6 @@ bool isEmpty(queue *);
 bool isFull(queue *);
 void destroy(queue *);
 
-/*uint8_t counter = 0, en = 0, de = 0;
-long int queue[MAX];*/
-
-/*
-int main(void) {
-	enqueue(1);
-	enqueue(2);
-	enqueue(3);
-	enqueue(4);
-	enqueue(5);
-
-	enqueue(6);
-
-	printf("%d\n", dequeue());
-	printf("%d\n", dequeue());
-	printf("%d\n", dequeue());
-	printf("%d\n", dequeue());
-	printf("%d\n", dequeue());
-	printf("%d\n", dequeue());
-
-	return 0;
-}*/
-
 queue *init_queue(bool fixed) {
 	queue *q = (queue *) malloc(sizeof(queue));
 	q->size = 0;
