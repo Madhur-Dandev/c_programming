@@ -390,8 +390,6 @@ int32_t fetch(ll *l, int32_t index)
 	d_ll *node = l->d_head;
 #endif
 
-
-
 	if (index == l->size - 1)
 	{
 		// if the index is size - 1 then return the tail node.

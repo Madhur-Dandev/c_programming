@@ -8,23 +8,23 @@ typedef struct ll ll;
 // values for flow of printing linked-list
 enum
 {
-	DEF, 		// default flow (straight)
-	REV  		// reverse flow
+	DEF, // default flow (straight)
+	REV	 // reverse flow
 };
 
 // structure for node of singly linked-list
 struct singly_node
 {
-	int32_t val;	// value of the node
-	s_ll *next; // address of the next node
+	int32_t val; // value of the node
+	s_ll *next;	 // address of the next node
 };
 
 // structure for node of doubly linked-list
 struct doubly_node
 {
-	int32_t val;	// value of the node
-	d_ll *prev; // address of the previous node
-	d_ll *next; // address of the next node
+	int32_t val; // value of the node
+	d_ll *prev;	 // address of the previous node
+	d_ll *next;	 // address of the next node
 };
 
 // common structure of linked-list,its operations and its data members
