@@ -16,6 +16,7 @@ tree *init_tree(void) {
 	t->binary_tree = NULL;
 	t->insert_node = &insert_node;
 	t->delete_node = &delete_node;
+	t->find_path = &find_path;
 	t->destroy = &destroy;
 	return t;
 }
