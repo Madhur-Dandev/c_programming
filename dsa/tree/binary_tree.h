@@ -20,7 +20,7 @@ enum
 // node of a tree
 struct tree_node
 {
-	int32_t val; // value of the node
+	int32_t value; // value of the node
 	node *left;	 // address of left subtree/node
 	node *right; // addrress of right subtree/node
 };
@@ -29,7 +29,8 @@ struct tree_node
 struct tree_node_list
 {
 	node *n;	// address of the node in queue
-	list *next; // address of next queue element.
+	list *next; // address of next element in the list.
+	list *prev; // address of previous element in the list.
 };
 
 // tree struct for efficiently managing tree resources.
@@ -50,6 +51,9 @@ struct path_node
 };
 
 tree *init_tree(void);
+node *build_node(int32_t);
+list *create_list_node(node *);
+void clear_list(list *);
 node *find_node(node *, int32_t *, int32_t *, int32_t *, int32_t);
 void insert_node(tree *, int32_t);
 node *find_parent_node(node *, int32_t *, int32_t *, int32_t *, int32_t);

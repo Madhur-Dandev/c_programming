@@ -112,7 +112,7 @@ void insert_node(tree *t, int32_t value)
 		return;
 	}
 
-	n->val = value;
+	n->value = value;
 	n->left = n->right = NULL;
 
 	if (t->binary_tree == NULL)
@@ -205,7 +205,7 @@ node *find_parent_node(node *n, int32_t *left_size, int32_t *right_size, int32_t
 
 int32_t delete_node(tree *t)
 {
-	int32_t return_val = 0;
+	int32_t return_value = 0;
 	int32_t left_size = 0;
 	int32_t right_size = 0;
 	int32_t height = 0;
@@ -230,7 +230,7 @@ int32_t delete_node(tree *t)
 			t->binary_tree = NULL;
 		}
 
-		return_val = to_free->val;
+		return_value = to_free->value;
 
 		free(to_free);
 	}
@@ -238,7 +238,7 @@ int32_t delete_node(tree *t)
 	if (height < t->height)
 		t->height = height;
 
-	return return_val;
+	return return_value;
 }
 
 void preorder(node *n)
@@ -246,7 +246,7 @@ void preorder(node *n)
 	if (n == NULL)
 		return;
 
-	printf("%d\n", n->val);
+	printf("%d\n", n->value);
 	preorder(n->left);
 	preorder(n->right);
 }
@@ -257,7 +257,7 @@ void inorder(node *n)
 		return;
 
 	inorder(n->left);
-	printf("%d\n", n->val);
+	printf("%d\n", n->value);
 	inorder(n->right);
 }
 
@@ -268,7 +268,7 @@ void postorder(node *n)
 
 	postorder(n->left);
 	postorder(n->right);
-	printf("%d\n", n->val);
+	printf("%d\n", n->value);
 }
 
 void level_order_main(node *n, int32_t height)
@@ -282,7 +282,7 @@ void level_order_main(node *n, int32_t height)
 
 	if (height == 1)
 	{
-		printf("%d\n", n->val);
+		printf("%d\n", n->value);
 	}
 	else
 	{
@@ -311,12 +311,12 @@ int32_t find_smallest(node *n)
 	int32_t right = find_smallest(n->right);
 
 	return left < right
-			   ? (left < n->val
+			   ? (left < n->value
 					  ? left
-					  : n->val)
-			   : (right < n->val
+					  : n->value)
+			   : (right < n->value
 					  ? right
-					  : n->val);
+					  : n->value);
 }
 
 int32_t find_largest(node *n)
@@ -327,35 +327,35 @@ int32_t find_largest(node *n)
 	int32_t right = find_largest(n->right);
 
 	return left > right
-			   ? (left > n->val
+			   ? (left > n->value
 					  ? left
-					  : n->val)
-			   : (right > n->val
+					  : n->value)
+			   : (right > n->value
 					  ? right
-					  : n->val);
+					  : n->value);
 }
 
-node *search_main(node *n, int32_t val)
+node *search_main(node *n, int32_t value)
 {
 	if (n == NULL)
 	{
 		return NULL;
 	}
 
-	if (n->val == val)
+	if (n->value == value)
 	{
 		return n;
 	}
 
-	node *left = search_main(n->left, val);
-	node *right = search_main(n->right, val);
+	node *left = search_main(n->left, value);
+	node *right = search_main(n->right, value);
 
 	return left != NULL ? left : right;
 }
 
-node *search(tree *t, int32_t val)
+node *search(tree *t, int32_t value)
 {
-	return search_main(t->binary_tree, val);
+	return search_main(t->binary_tree, value);
 }
 
 path_node *make_path_node(path_node *prev, int32_t side)
@@ -370,7 +370,7 @@ path_node *make_path_node(path_node *prev, int32_t side)
 	return p;
 }
 
-path_node *find_path_main(node *n, int32_t val, int32_t side)
+path_node *find_path_main(node *n, int32_t value, int32_t side)
 {
 	/* If will recurse down in tree and check for the node
 	 * if found it traverse back while making a singly
@@ -384,13 +384,13 @@ path_node *find_path_main(node *n, int32_t val, int32_t side)
 	if (n == NULL)
 		return NULL;
 
-	if (n->val == val)
+	if (n->value == value)
 	{
 		return make_path_node(NULL, side);
 	}
 
-	path_node *left = find_path_main(n->left, val, LEFT);
-	path_node *right = find_path_main(n->right, val, RIGHT);
+	path_node *left = find_path_main(n->left, value, LEFT);
+	path_node *right = find_path_main(n->right, value, RIGHT);
 
 	if (left != NULL)
 	{
@@ -417,10 +417,10 @@ path_node *find_path_main(node *n, int32_t val, int32_t side)
 	}
 }
 
-path_node *find_path(tree *t, int32_t val)
+path_node *find_path(tree *t, int32_t value)
 {
 	// This algorithm is baised towards left side search
-	return find_path_main(t->binary_tree, val, ROOT);
+	return find_path_main(t->binary_tree, value, ROOT);
 }
 
 void destroy_tree(node *n)
