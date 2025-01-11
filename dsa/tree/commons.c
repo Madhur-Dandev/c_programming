@@ -49,6 +49,9 @@ list *create_list_node(node *n)
 
 void clear_list(list *l) 
 {
+	if(l == NULL)
+		return;
+	
 	list *temp = l, *to_free;
 
 	while(temp != NULL)
@@ -63,7 +66,11 @@ void clear_list(list *l)
 
 void destroy(tree *t)
 {
-	destroy_tree(t->binary_tree);
+	if(destroy_tree(t->binary_tree))
+	{
+		puts("Unable to destroy the tree.");
+		return;
+	}
 	t->binary_tree = NULL;
 	free(t);
 	puts("Tree Destroyed.");

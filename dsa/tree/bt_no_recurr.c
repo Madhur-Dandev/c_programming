@@ -2,37 +2,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int32_t add_child(node *n, list *head, list *tail)
+int32_t add_child(node *n, list *head, list **tail)
 {
-	/*list *next1 = create_list_node(n->left);
-	list *next2 = create_list_node(n->right);*/
-
 	if(n == NULL)
 		return 0;
 
 	list *new = create_list_node(n);
 	if(new == NULL)
 	{
-		clear_list(head);
 		return 1;
 	}
-			
-	/*if(next1 == NULL || next2 == NULL)
-	{
-		if(next1 != NULL)
-			free(next1);
 
-		if(next2 != NULL)
-			free(next2);
-
-		clear_list(head);
-		puts("Cannot insert the value in tree.");
-		return 1;
-	}*/
-
-	new->prev = tail;
-	tail->next = new;
-	tail = new;
+	new->prev = *tail;
+	(*tail)->next = new;
+	*tail = new;
 
 	return 0;
 }
@@ -64,34 +47,10 @@ void insert_node(tree *t, int32_t value) {
 			}
 			else
 			{
-				/*tree *next1 = create_list_node(head->n->left);
-				tree *next2 = create_list_node(head->n->right);
-				
-				if(next1 == NULL || next2 == NULL)
+				if(add_child(head->n->left, head, &tail) ||
+				   add_child(head->n->right, head, &tail))
 				{
-					if(next1 != NULL)
-						free(next1);
-
-					if(next2 != NULL)
-						free(next2);
-
 					clear_list(head);
-					puts("Cannot insert the value in tree.");
-					return;
-				}
-
-				next1->next = next2;
-				tail->next = next1;
-				tail = next2;*/
-				
-				if(add_child(head->n->left, head, tail))
-				{
-					puts("Cannot insert the value in tree.");
-					return;
-				}
-
-				if(add_child(head->n->right, head, tail))
-				{
 					puts("Cannot insert the value in tree.");
 					return;
 				}
@@ -101,10 +60,9 @@ void insert_node(tree *t, int32_t value) {
 				free(to_free);
 			}
 		}
-
-		puts("Value inserted in tree");
-		return;
 	}
+	puts("Value inserted in tree");
+	return;
 }
 
 int32_t delete_node(tree *t)
@@ -134,38 +92,13 @@ int32_t delete_node(tree *t)
 		}
 		else
 		{
-			/*tree *next1 = create_list_node(head->n->left);
-			tree *next2 = create_list_node(head->n->right);
-				
-			if(next1 == NULL || next2 == NULL)
+			if(add_child(temp->n->left, head, &tail) ||
+			   add_child(temp->n->right, head, &tail))
 			{
-				if(next1 != NULL)
-					free(next1);
-
-				if(next2 != NULL)
-					free(next2);
-
 				clear_list(head);
-				puts("Cannot insert the value in tree.");
-				return;
-			}
-
-			next1->prev = tail;
-			next2->prev = next1;
-			next1->next = next2;
-			tail->next = next1;
-			tail = next2;*/
-			if(add_child(temp->n->left, head, tail))
-			{
 				puts("Cannot delete from tree.");
 				return 0;
 			}
-
-			if(add_child(temp->n->right, head, tail))
-			{
-				puts("Cannot delete from tree.");
-				return 0;
-			}	
 
 			to_free = head;
 			free(to_free);
@@ -196,7 +129,7 @@ path_node *find_path(tree *t, int32_t value)
 	return NULL;
 }
 
-void destroy_tree(node *n)
+int32_t destroy_tree(node *n)
 {
 	list *head, *tail, *to_free;
 	head = tail = create_list_node(n);
@@ -206,24 +139,49 @@ void destroy_tree(node *n)
 	{
 		if(head->n->left)
 		{
-			if(add_child(head->n->left, head, tail))
+			if(add_child(head->n->left, head, &tail))
 			{
 				puts("Cannot destroy the tree.");
-				return;
+				return 1;
 			}
 		}
 
 		if(head->n->right)
 		{
-			if(add_child(head->n->right, head, tail))
+			if(add_child(head->n->right, head, &tail))
 			{
 				puts("Cannot destroy the tree.");
-				return;
+				return 1;
 			}
 		}
 
 		to_delete = head->n;
 		free(to_delete);
+		to_free = head;
+		head = head->next;
+		free(to_free);
+	}
+
+	return 0;
+}
+
+void level_order(tree *t)
+{
+	list *head, *tail, *to_free;
+	head = tail = create_list_node(t->binary_tree);
+	
+	while(head != NULL)
+	{
+		printf("%d\n", head->n->value);
+		
+		if(add_child(head->n->left, head, &tail) ||
+		   add_child(head->n->right, head, &tail))
+		{
+			clear_list(head);
+			puts("Unable to perform level-order traversal.");
+			return;
+		}
+
 		to_free = head;
 		head = head->next;
 		free(to_free);

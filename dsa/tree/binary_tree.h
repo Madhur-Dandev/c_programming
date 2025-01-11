@@ -66,7 +66,7 @@ int32_t find_smallest(node *);
 int32_t find_largest(node *);
 node *search(tree *, int32_t);
 path_node *find_path(tree *, int32_t);
-void destroy_tree(node *);
+int32_t destroy_tree(node *);
 void destroy(tree *);
 
 #endif
