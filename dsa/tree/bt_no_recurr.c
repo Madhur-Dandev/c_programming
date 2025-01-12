@@ -275,29 +275,56 @@ void preorder(node *n)
 
 void inorder(node *root)
 {
-	/*list *head, *left, *right, *to_free;
-	head = left = righ = create_list_node(n);*/
 	list *head, *tail, *to_free;
-	head = tail = create_list_node(n);
+	head = tail = create_list_node(root);
 	bool is_traceback = false;
-	bool left, right;
-	left = right = true;
 
 	while(head != NULL)
 	{
 		if(is_traceback)
-		{}
+		{
+			printf("%d\n", tail->n->value);
+			to_free = tail;
+			tail = tail->prev;
+			list *new = create_list_node(to_free->n->right);
+			if(new == NULL)
+			{
+				clear_list(head);
+				return;
+			}
+
+			if(tail)
+			{
+				tail->next = new;
+				new->prev = tail;
+				tail = new;
+			}
+			else
+			{
+				head = tail = new;
+			}
+			free(to_free);
+			is_traceback = false;
+		}
 		else
 		{
-			if(head->n->left)
+			if(tail->n->left)
 			{
-				if(add_child(head->n->left, &tail))
+				if(add_child(tail->n->left, &tail))
 				{
-					clear_list(head);
-					head = tail = NULL;
+					clear_list(tail);
 					return;
 				}
-
+			}
+			else
+			{
+				printf("%d\n", tail->n->value);
+				to_free = tail;
+				if(tail->prev)
+					tail->prev->next = NULL;
+				tail = tail->prev;
+				free(to_free);
+				is_traceback = true;
 			}
 		}
 	}
