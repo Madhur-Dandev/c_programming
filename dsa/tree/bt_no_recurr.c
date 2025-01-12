@@ -1,8 +1,10 @@
+// fix the clear_list logic in preorder function
 #include "binary_tree.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-int32_t add_child(node *n, list *head, list **tail)
+int32_t add_child(node *n, list **tail)
 {
 	if(n == NULL)
 		return 0;
@@ -47,8 +49,8 @@ void insert_node(tree *t, int32_t value) {
 			}
 			else
 			{
-				if(add_child(head->n->left, head, &tail) ||
-				   add_child(head->n->right, head, &tail))
+				if(add_child(head->n->left, &tail) ||
+				   add_child(head->n->right, &tail))
 				{
 					clear_list(head);
 					puts("Cannot insert the value in tree.");
@@ -92,8 +94,8 @@ int32_t delete_node(tree *t)
 		}
 		else
 		{
-			if(add_child(temp->n->left, head, &tail) ||
-			   add_child(temp->n->right, head, &tail))
+			if(add_child(temp->n->left, &tail) ||
+			   add_child(temp->n->right, &tail))
 			{
 				clear_list(head);
 				puts("Cannot delete from tree.");
@@ -139,7 +141,7 @@ int32_t destroy_tree(node *n)
 	{
 		if(head->n->left)
 		{
-			if(add_child(head->n->left, head, &tail))
+			if(add_child(head->n->left, &tail))
 			{
 				puts("Cannot destroy the tree.");
 				return 1;
@@ -148,7 +150,7 @@ int32_t destroy_tree(node *n)
 
 		if(head->n->right)
 		{
-			if(add_child(head->n->right, head, &tail))
+			if(add_child(head->n->right, &tail))
 			{
 				puts("Cannot destroy the tree.");
 				return 1;
@@ -174,8 +176,8 @@ void level_order(tree *t)
 	{
 		printf("%d\n", head->n->value);
 		
-		if(add_child(head->n->left, head, &tail) ||
-		   add_child(head->n->right, head, &tail))
+		if(add_child(head->n->left, &tail) ||
+		   add_child(head->n->right, &tail))
 		{
 			clear_list(head);
 			puts("Unable to perform level-order traversal.");
@@ -186,4 +188,118 @@ void level_order(tree *t)
 		head = head->next;
 		free(to_free);
 	}
+	putc('\n', stdout);
+}
+
+void preorder(node *n)
+{
+	list *head, *tail, *to_free, *temp;
+	head = tail = create_list_node(n);
+	bool is_traceback = false;
+
+	while(head != NULL)
+	{
+		if(is_traceback)
+		{
+			if(head->n->right)
+			{
+				if(add_child(head->n->right, &tail))
+				{
+					clear_list(head);
+					head = NULL;
+				}
+			}
+			to_free = head;
+
+			if(head->next != NULL)
+				head->next->prev = head->prev;
+
+			if(head->prev != NULL)
+			{
+				head->prev->next = head->next;
+				head = head->prev;
+			}
+			else
+			{
+				is_traceback = false;
+				head = head->next;
+			}
+
+			if(tail == to_free)
+				tail = head;
+
+			free(to_free);
+		}
+		else
+		{
+			printf("%d\n", head->n->value);
+			if(head->n->left)
+			{
+				if(add_child(head->n->left, &tail))
+				{
+					clear_list(head);
+					head = NULL;
+				}
+				head = head->next;
+			}
+			else
+			{
+				is_traceback = true;
+				to_free = head;
+				
+				if(head->next != NULL)
+					head->next->prev = head->prev;
+
+				if(head->prev != NULL)
+				{
+					head->prev->next = head->next;
+					head = head->prev;
+				}
+				else
+				{
+					is_traceback = false;
+					head = head->next;
+				}
+
+				if(tail == to_free)
+					tail = head;
+
+				free(to_free);
+			}
+		}
+	}
+
+	putc('\n', stdout);
+	return;
+}
+
+void inorder(node *root)
+{
+	/*list *head, *left, *right, *to_free;
+	head = left = righ = create_list_node(n);*/
+	list *head, *tail, *to_free;
+	head = tail = create_list_node(n);
+	bool is_traceback = false;
+	bool left, right;
+	left = right = true;
+
+	while(head != NULL)
+	{
+		if(is_traceback)
+		{}
+		else
+		{
+			if(head->n->left)
+			{
+				if(add_child(head->n->left, &tail))
+				{
+					clear_list(head);
+					head = tail = NULL;
+					return;
+				}
+
+			}
+		}
+	}
+	return;
 }
