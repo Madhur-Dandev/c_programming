@@ -16,9 +16,16 @@ int32_t add_child(node *n, list **tail)
 	}
 
 	new->prev = *tail;
-	(*tail)->next = new;
-	*tail = new;
-
+	if(*tail == NULL)
+	{
+		*tail = new;
+		new->next = NULL;
+	}
+	else
+	{
+		(*tail)->next = new;
+		*tail = new;
+	}
 	return 0;
 }
 
@@ -295,9 +302,10 @@ void inorder(node *root)
 {
 	list *head, *tail, *to_free;
 	head = tail = create_list_node(root);
+	to_free = NULL;
 	bool is_traceback = false;
 
-	while(head != NULL)
+	/*while(head != NULL)
 	{
 		if(is_traceback)
 		{
@@ -331,7 +339,7 @@ void inorder(node *root)
 				if(add_child(tail->n->left, &tail))
 				{
 					clear_list(tail);
-					return;
+					head = tail = NULL;;
 				}
 			}
 			else
@@ -345,6 +353,110 @@ void inorder(node *root)
 				is_traceback = true;
 			}
 		}
+	}*/
+
+	while(tail != NULL)
+	{
+		if(to_free)
+		{
+			printf("%d\n", to_free->n->value);
+			free(to_free);
+		}
+		if(is_traceback)
+		{
+			to_free = tail;
+			tail = tail->prev;
+			if(add_child(to_free->n->right, &tail))
+			{
+				clear_list(head);
+				return;
+			}
+			is_traceback = false;
+		}
+		else
+		{
+			if(tail->n->left != NULL)
+			{
+				if(add_child(tail->n->left, &tail))
+				{
+					clear_list(head);
+					return;
+				}
+				to_free = NULL;
+			}
+			else
+			{
+				to_free = tail;
+				tail = tail->prev;
+				is_traceback = true;
+			}
+		}
 	}
+
+	if(to_free != NULL)
+	{
+		printf("%d\n", to_free->n->value);
+		free(to_free);
+	}
+	puts("");
+	return;
+}
+
+void postorder(node *root)
+{
+	list *head, *tail, *to_free;
+	bool is_traceback = false;
+
+	head = tail = create_list_node(root);
+	to_free = NULL;
+
+	while(tail != NULL)
+	{
+		if(is_traceback)
+		{
+			printf("%d\n", to_free->n->value);
+			if(to_free->n == tail->n->right)
+			{
+				free(to_free);
+				to_free = tail;
+				tail = tail->prev;
+			}
+			else
+			{
+				free(to_free);
+				if(add_child(tail->n->right, &tail))
+				{
+					clear_list(head);
+					return;
+				}
+				
+				is_traceback = false;
+			}
+		}
+		else
+		{
+			to_free = tail;
+			if(tail->n->left != NULL)
+			{
+				if(add_child(tail->n->left, &tail))
+				{
+					clear_list(head);
+					return;
+				}
+			}
+			else
+			{
+				is_traceback = true;
+				tail = tail->prev;
+			}
+		}
+	}
+
+	if(to_free != NULL)
+	{
+		printf("%d\n", to_free->n->value);
+		free(to_free);
+	}
+	puts("");
 	return;
 }
