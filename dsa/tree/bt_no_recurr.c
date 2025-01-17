@@ -76,26 +76,39 @@ int32_t delete_node(tree *t)
 	}
 
 	node *parent, *to_delete;
-	list *head, *tail, *temp, *to_free;
-	head = tail = temp = create_list_node(t->binary_tree);
+	list *head, *tail, *to_free;
+	head = tail = create_list_node(t->binary_tree);
+	to_free = NULL;
 	int32_t to_return;
 
-	while(temp != NULL)
+	while(head != NULL)
 	{
 		if(head->n->left == NULL)
 		{
-			parent = head->n;
+		    if(to_free)
+		    {
+    			parent = to_free->n;
+		    }
+			else
+		    {
+				parent = head->n;
+			}
 			break;
 		}
 		else if(head->n->right == NULL)
 		{
-			parent = temp->n;
+			parent = head->n;
 			break;
 		}
 		else
 		{
-			if(add_child(temp->n->left, &tail) ||
-			   add_child(temp->n->right, &tail))
+		    if(to_free)
+		    {
+				free(to_free);
+				to_free = NULL;
+			}
+			if(add_child(head->n->left, &tail) ||
+			   add_child(head->n->right, &tail))
 			{
 				clear_list(head);
 				puts("Cannot delete from tree.");
@@ -103,25 +116,30 @@ int32_t delete_node(tree *t)
 			}
 
 			to_free = head;
-			free(to_free);
-			head = temp;
-			
-			temp = temp->next;
+			head = head->next;
 		}
 	}
 
+	free(to_free);
 	clear_list(head);
 
-	to_delete = parent->right != NULL
-				? parent->right
-				: parent->left;
+	if(parent->left)
+    {
+		to_delete = parent->right != NULL
+						? parent->right
+						: parent->left;
 
-	to_return = to_delete->value;
-
-	parent->right != NULL
-	? ({parent->right = NULL;})
-	: ({parent->right = NULL;});
+		parent->right != NULL
+     	? ({parent->right = NULL;})
+    	: ({parent->left = NULL;});
+    }
+	else
+    {
+		to_delete = parent;
+		t->binary_tree = NULL;
+	}
 	
+	to_return = to_delete->value;
 	free(to_delete);
 	return to_return;
 }
