@@ -305,56 +305,6 @@ void inorder(node *root)
 	to_free = NULL;
 	bool is_traceback = false;
 
-	/*while(head != NULL)
-	{
-		if(is_traceback)
-		{
-			printf("%d\n", tail->n->value);
-			to_free = tail;
-			tail = tail->prev;
-			list *new = create_list_node(to_free->n->right);
-			if(new == NULL)
-			{
-				clear_list(head);
-				return;
-			}
-
-			if(tail)
-			{
-				tail->next = new;
-				new->prev = tail;
-				tail = new;
-			}
-			else
-			{
-				head = tail = new;
-			}
-			free(to_free);
-			is_traceback = false;
-		}
-		else
-		{
-			if(tail->n->left)
-			{
-				if(add_child(tail->n->left, &tail))
-				{
-					clear_list(tail);
-					head = tail = NULL;;
-				}
-			}
-			else
-			{
-				printf("%d\n", tail->n->value);
-				to_free = tail;
-				if(tail->prev)
-					tail->prev->next = NULL;
-				tail = tail->prev;
-				free(to_free);
-				is_traceback = true;
-			}
-		}
-	}*/
-
 	while(tail != NULL)
 	{
 		if(to_free)
