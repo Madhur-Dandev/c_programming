@@ -1,6 +1,8 @@
 #ifndef BINARY_TREE_H
 #define BINARY_TREE_H
 
+#include <stdlib.h>
+#include <stdbool.h>
 #include <inttypes.h>
 
 typedef struct tree_node node;
@@ -46,7 +48,7 @@ struct tree
 
 struct path_node
 {
-	char position;
+	int32_t position;
 	path_node *next;
 };
 
@@ -65,6 +67,7 @@ void level_order(tree *);
 int32_t find_smallest(node *);
 int32_t find_largest(node *);
 node *search(tree *, int32_t);
+path_node *make_path_node(path_node *, int32_t);
 path_node *find_path(tree *, int32_t);
 int32_t destroy_tree(node *);
 void destroy(tree *);

@@ -76,3 +76,20 @@ void destroy(tree *t)
 	puts("Tree Destroyed.");
 	return;
 }
+
+path_node *make_path_node(path_node *prev, int32_t side)
+{
+        path_node *p = (path_node *)malloc(sizeof(path_node));
+		if(p == NULL)
+		{
+			return NULL;
+		}
+		p->position = side;
+        /*p->position = side == LEFT
+                      ? 'L'
+                      : side == RIGHT
+                       	? 'R'
+                        : '-';*/
+        p->next = prev;
+        return p;
+}

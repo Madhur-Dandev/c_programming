@@ -1,4 +1,3 @@
-// fix the clear_list logic in preorder function
 #include "binary_tree.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -154,21 +153,18 @@ int32_t delete_node(tree *t)
 
 path_node *find_path(tree *t, int32_t value)
 {
-	/*list *head, *tail, *to_free;
+	list *head, *tail, *to_free;
 	bool is_traceback = false;
-	path_node *head, tail;
-
-	head = tail = create_list_node(root);
+	path_node *path_head, *path_tail, *path_temp;
+	path_head = path_tail = path_temp = NULL;
+	head = tail = create_list_node(t->binary_tree);
 	to_free = NULL;
 
 	while (tail != NULL)
-	{
-		if(tail->n->value == value)
-			break;
-		
+	{	
 		if (is_traceback)
 		{
-			if (to_free->n == tail->n->right)
+			if(tail->n->right == to_free->n)
 			{
 				free(to_free);
 				to_free = tail;
@@ -180,35 +176,37 @@ path_node *find_path(tree *t, int32_t value)
 				if (add_child(tail->n->right, &tail))
 				{
 					clear_list(head);
-					return;
+					return NULL;
 				}
-
+				to_free = NULL;
 				is_traceback = false;
 			}
 		}
 		else
 		{
-			to_free = tail;
+			if(tail->n->value == value)
+				break;
+		
 			if (tail->n->left != NULL)
 			{
 				if (add_child(tail->n->left, &tail))
 				{
 					clear_list(head);
-					return;
+					return NULL;
 				}
 			}
 			else
 			{
 				is_traceback = true;
+				to_free = tail;
 				tail = tail->prev;
 			}
 		}
 	}
-
-	if(to_free == t->binary_tree)
-		free(to_free);
-		return NULL;
 	
+	if(to_free == head)
+		head = NULL;
+
 	if(to_free)
 		free(to_free);
 
@@ -216,24 +214,28 @@ path_node *find_path(tree *t, int32_t value)
 
 	while(head != NULL)
 	{
-		to_free = head;
-		head = head->next;
-		if(head == NULL)
+		if(to_free == NULL)
 		{
-			head = tail = (path_node *) malloc(sizeof(path_node));
-			if(head == NULL)
+			path_head = path_tail = make_path_node(NULL, ROOT);
+			if(path_head == NULL)
 			{
 				clear_list(head);
 				return NULL;
 			}
-			head->position = ROOT;
 		}
 		else
 		{
-			
+			path_temp = make_path_node(NULL, to_free->n->right == head->n
+											 ? RIGHT : LEFT);
+			path_tail->next = path_temp;
+			path_tail = path_temp;
+			free(to_free);
+
 		}
-	}*/
-	return NULL;
+		to_free = head;
+		head = head->next;
+	}
+	return path_head;
 }
 
 int32_t destroy_tree(node *n)
