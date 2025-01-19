@@ -6,17 +6,17 @@
 
 int32_t add_child(node *n, list **tail)
 {
-	if(n == NULL)
+	if (n == NULL)
 		return 0;
 
 	list *new = create_list_node(n);
-	if(new == NULL)
+	if (new == NULL)
 	{
 		return 1;
 	}
 
 	new->prev = *tail;
-	if(*tail == NULL)
+	if (*tail == NULL)
 	{
 		*tail = new;
 		new->next = NULL;
@@ -29,12 +29,13 @@ int32_t add_child(node *n, list **tail)
 	return 0;
 }
 
-void insert_node(tree *t, int32_t value) {
+void insert_node(tree *t, int32_t value)
+{
 	node *new = build_node(value);
-	if(new == NULL)
+	if (new == NULL)
 		return;
 
-	if(t->binary_tree == NULL)
+	if (t->binary_tree == NULL)
 	{
 		t->binary_tree = new;
 	}
@@ -42,28 +43,28 @@ void insert_node(tree *t, int32_t value) {
 	{
 		list *head, *tail, *to_free;
 		head = tail = create_list_node(t->binary_tree);
-		while(head != NULL)
+		while (head != NULL)
 		{
-			if(head->n->left == NULL)
+			if (head->n->left == NULL)
 			{
 				head->n->left = new;
 				break;
 			}
-			else if(head->n->right == NULL)
+			else if (head->n->right == NULL)
 			{
 				head->n->right = new;
 				break;
 			}
 			else
 			{
-				if(add_child(head->n->left, &tail) ||
-				   add_child(head->n->right, &tail))
+				if (add_child(head->n->left, &tail) ||
+					add_child(head->n->right, &tail))
 				{
 					clear_list(head);
 					puts("Cannot insert the value in tree.");
 					return;
 				}
-				
+
 				to_free = head;
 				head = head->next;
 				free(to_free);
@@ -76,7 +77,7 @@ void insert_node(tree *t, int32_t value) {
 
 int32_t delete_node(tree *t)
 {
-	if(t->binary_tree == NULL)
+	if (t->binary_tree == NULL)
 	{
 		puts("Nothing to delete.");
 		return 0;
@@ -88,34 +89,34 @@ int32_t delete_node(tree *t)
 	to_free = NULL;
 	int32_t to_return;
 
-	while(head != NULL)
+	while (head != NULL)
 	{
-		if(head->n->left == NULL)
+		if (head->n->left == NULL)
 		{
-		    if(to_free)
-		    {
-    			parent = to_free->n;
-		    }
+			if (to_free)
+			{
+				parent = to_free->n;
+			}
 			else
-		    {
+			{
 				parent = head->n;
 			}
 			break;
 		}
-		else if(head->n->right == NULL)
+		else if (head->n->right == NULL)
 		{
 			parent = head->n;
 			break;
 		}
 		else
 		{
-		    if(to_free)
-		    {
+			if (to_free)
+			{
 				free(to_free);
 				to_free = NULL;
 			}
-			if(add_child(head->n->left, &tail) ||
-			   add_child(head->n->right, &tail))
+			if (add_child(head->n->left, &tail) ||
+				add_child(head->n->right, &tail))
 			{
 				clear_list(head);
 				puts("Cannot delete from tree.");
@@ -130,22 +131,22 @@ int32_t delete_node(tree *t)
 	free(to_free);
 	clear_list(head);
 
-	if(parent->left)
-    {
+	if (parent->left)
+	{
 		to_delete = parent->right != NULL
 						? parent->right
 						: parent->left;
 
 		parent->right != NULL
-     	? ({parent->right = NULL;})
-    	: ({parent->left = NULL;});
-    }
+			? ({ parent->right = NULL; })
+			: ({ parent->left = NULL; });
+	}
 	else
-    {
+	{
 		to_delete = parent;
 		t->binary_tree = NULL;
 	}
-	
+
 	to_return = to_delete->value;
 	free(to_delete);
 	return to_return;
@@ -153,6 +154,85 @@ int32_t delete_node(tree *t)
 
 path_node *find_path(tree *t, int32_t value)
 {
+	/*list *head, *tail, *to_free;
+	bool is_traceback = false;
+	path_node *head, tail;
+
+	head = tail = create_list_node(root);
+	to_free = NULL;
+
+	while (tail != NULL)
+	{
+		if(tail->n->value == value)
+			break;
+		
+		if (is_traceback)
+		{
+			if (to_free->n == tail->n->right)
+			{
+				free(to_free);
+				to_free = tail;
+				tail = tail->prev;
+			}
+			else
+			{
+				free(to_free);
+				if (add_child(tail->n->right, &tail))
+				{
+					clear_list(head);
+					return;
+				}
+
+				is_traceback = false;
+			}
+		}
+		else
+		{
+			to_free = tail;
+			if (tail->n->left != NULL)
+			{
+				if (add_child(tail->n->left, &tail))
+				{
+					clear_list(head);
+					return;
+				}
+			}
+			else
+			{
+				is_traceback = true;
+				tail = tail->prev;
+			}
+		}
+	}
+
+	if(to_free == t->binary_tree)
+		free(to_free);
+		return NULL;
+	
+	if(to_free)
+		free(to_free);
+
+	to_free = NULL;
+
+	while(head != NULL)
+	{
+		to_free = head;
+		head = head->next;
+		if(head == NULL)
+		{
+			head = tail = (path_node *) malloc(sizeof(path_node));
+			if(head == NULL)
+			{
+				clear_list(head);
+				return NULL;
+			}
+			head->position = ROOT;
+		}
+		else
+		{
+			
+		}
+	}*/
 	return NULL;
 }
 
@@ -162,20 +242,20 @@ int32_t destroy_tree(node *n)
 	head = tail = create_list_node(n);
 	node *to_delete;
 
-	while(head != NULL)
+	while (head != NULL)
 	{
-		if(head->n->left)
+		if (head->n->left)
 		{
-			if(add_child(head->n->left, &tail))
+			if (add_child(head->n->left, &tail))
 			{
 				puts("Cannot destroy the tree.");
 				return 1;
 			}
 		}
 
-		if(head->n->right)
+		if (head->n->right)
 		{
-			if(add_child(head->n->right, &tail))
+			if (add_child(head->n->right, &tail))
 			{
 				puts("Cannot destroy the tree.");
 				return 1;
@@ -196,13 +276,14 @@ void level_order(tree *t)
 {
 	list *head, *tail, *to_free;
 	head = tail = create_list_node(t->binary_tree);
-	
-	while(head != NULL)
+
+	printf("Level-Order:\n");
+	while (head != NULL)
 	{
 		printf("%d\n", head->n->value);
-		
-		if(add_child(head->n->left, &tail) ||
-		   add_child(head->n->right, &tail))
+
+		if (add_child(head->n->left, &tail) ||
+			add_child(head->n->right, &tail))
 		{
 			clear_list(head);
 			puts("Unable to perform level-order traversal.");
@@ -222,74 +303,48 @@ void preorder(node *n)
 	head = tail = create_list_node(n);
 	bool is_traceback = false;
 
-	while(head != NULL)
+	printf("Pre-Order:\n");
+	while(tail != NULL)
 	{
 		if(is_traceback)
 		{
-			if(head->n->right)
+			if(tail->n->right == to_free->n)
 			{
-				if(add_child(head->n->right, &tail))
-				{
-					clear_list(head);
-					head = NULL;
-				}
-			}
-			to_free = head;
+				if(to_free)
+					free(to_free);
 
-			if(head->next != NULL)
-				head->next->prev = head->prev;
-
-			if(head->prev != NULL)
-			{
-				head->prev->next = head->next;
-				head = head->prev;
+				to_free = tail;
+				tail = tail->prev;
 			}
 			else
 			{
+				if(to_free)
+					free(to_free);
+
+				if(add_child(tail->n->right, &tail))
+				{
+					clear_list(head);
+					return;
+				}
 				is_traceback = false;
-				head = head->next;
 			}
-
-			if(tail == to_free)
-				tail = head;
-
-			free(to_free);
 		}
 		else
 		{
-			printf("%d\n", head->n->value);
-			if(head->n->left)
+			printf("%d\n", tail->n->value);
+			if(tail->n->left != NULL)
 			{
-				if(add_child(head->n->left, &tail))
+				if(add_child(tail->n->left, &tail))
 				{
 					clear_list(head);
-					head = NULL;
+					return;
 				}
-				head = head->next;
 			}
 			else
 			{
 				is_traceback = true;
-				to_free = head;
-				
-				if(head->next != NULL)
-					head->next->prev = head->prev;
-
-				if(head->prev != NULL)
-				{
-					head->prev->next = head->next;
-					head = head->prev;
-				}
-				else
-				{
-					is_traceback = false;
-					head = head->next;
-				}
-
-				if(tail == to_free)
-					tail = head;
-
-				free(to_free);
+				to_free = tail;
+				tail = tail->prev;
 			}
 		}
 	}
@@ -305,18 +360,19 @@ void inorder(node *root)
 	to_free = NULL;
 	bool is_traceback = false;
 
-	while(tail != NULL)
+	printf("In-Order:\n");
+	while (tail != NULL)
 	{
-		if(to_free)
+		if (to_free)
 		{
 			printf("%d\n", to_free->n->value);
 			free(to_free);
 		}
-		if(is_traceback)
+		if (is_traceback)
 		{
 			to_free = tail;
 			tail = tail->prev;
-			if(add_child(to_free->n->right, &tail))
+			if (add_child(to_free->n->right, &tail))
 			{
 				clear_list(head);
 				return;
@@ -325,9 +381,9 @@ void inorder(node *root)
 		}
 		else
 		{
-			if(tail->n->left != NULL)
+			if (tail->n->left != NULL)
 			{
-				if(add_child(tail->n->left, &tail))
+				if (add_child(tail->n->left, &tail))
 				{
 					clear_list(head);
 					return;
@@ -343,7 +399,7 @@ void inorder(node *root)
 		}
 	}
 
-	if(to_free != NULL)
+	if (to_free != NULL)
 	{
 		printf("%d\n", to_free->n->value);
 		free(to_free);
@@ -360,12 +416,13 @@ void postorder(node *root)
 	head = tail = create_list_node(root);
 	to_free = NULL;
 
-	while(tail != NULL)
+	printf("Post-Order:\n");
+	while (tail != NULL)
 	{
-		if(is_traceback)
+		if (is_traceback)
 		{
 			printf("%d\n", to_free->n->value);
-			if(to_free->n == tail->n->right)
+			if (to_free->n == tail->n->right)
 			{
 				free(to_free);
 				to_free = tail;
@@ -374,21 +431,21 @@ void postorder(node *root)
 			else
 			{
 				free(to_free);
-				if(add_child(tail->n->right, &tail))
+				if (add_child(tail->n->right, &tail))
 				{
 					clear_list(head);
 					return;
 				}
-				
+
 				is_traceback = false;
 			}
 		}
 		else
 		{
 			to_free = tail;
-			if(tail->n->left != NULL)
+			if (tail->n->left != NULL)
 			{
-				if(add_child(tail->n->left, &tail))
+				if (add_child(tail->n->left, &tail))
 				{
 					clear_list(head);
 					return;
@@ -402,7 +459,7 @@ void postorder(node *root)
 		}
 	}
 
-	if(to_free != NULL)
+	if (to_free != NULL)
 	{
 		printf("%d\n", to_free->n->value);
 		free(to_free);
