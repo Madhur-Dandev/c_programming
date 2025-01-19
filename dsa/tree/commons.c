@@ -85,11 +85,6 @@ path_node *make_path_node(path_node *prev, int32_t side)
 			return NULL;
 		}
 		p->position = side;
-        /*p->position = side == LEFT
-                      ? 'L'
-                      : side == RIGHT
-                       	? 'R'
-                        : '-';*/
         p->next = prev;
         return p;
 }

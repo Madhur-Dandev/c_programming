@@ -299,10 +299,10 @@ void level_order(tree *t)
 	putc('\n', stdout);
 }
 
-void preorder(node *n)
+void preorder(tree *t)
 {
 	list *head, *tail, *to_free, *temp;
-	head = tail = create_list_node(n);
+	head = tail = create_list_node(t->binary_tree);
 	bool is_traceback = false;
 
 	printf("Pre-Order:\n");
@@ -355,10 +355,10 @@ void preorder(node *n)
 	return;
 }
 
-void inorder(node *root)
+void inorder(tree *t)
 {
 	list *head, *tail, *to_free;
-	head = tail = create_list_node(root);
+	head = tail = create_list_node(t->binary_tree);
 	to_free = NULL;
 	bool is_traceback = false;
 
@@ -410,12 +410,12 @@ void inorder(node *root)
 	return;
 }
 
-void postorder(node *root)
+void postorder(tree *t)
 {
 	list *head, *tail, *to_free;
 	bool is_traceback = false;
 
-	head = tail = create_list_node(root);
+	head = tail = create_list_node(t->binary_tree);
 	to_free = NULL;
 
 	printf("Post-Order:\n");

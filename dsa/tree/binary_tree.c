@@ -4,25 +4,6 @@
 #include <limits.h>
 #include "binary_tree.h"
 
-// struct tracker tracker;
-
-tree *init_tree(void)
-{
-	tree *t = (tree *)malloc(sizeof(tree));
-	if (t == NULL)
-	{
-		puts("Unable to created tree. Allocation failed.");
-		return NULL;
-	}
-	t->height = 0;
-	t->binary_tree = NULL;
-	t->insert_node = &insert_node;
-	t->delete_node = &delete_node;
-	t->find_path = &find_path;
-	t->destroy = &destroy;
-	return t;
-}
-
 node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *height, int32_t side)
 {
 	/* recursive function for finding parent node for child
@@ -104,20 +85,17 @@ node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *heigh
 }
 
 void insert_node(tree *t, int32_t value)
-{
-	node *n = (node *)malloc(sizeof(node));
-	if (n == NULL)
+{	
+	node *new = build_node(value);
+	if(!new)
 	{
-		puts("Cannot insert node");
+		puts("Cannot insert the value in tree.");
 		return;
 	}
 
-	n->value = value;
-	n->left = n->right = NULL;
-
 	if (t->binary_tree == NULL)
 	{
-		t->binary_tree = n;
+		t->binary_tree = new;
 		return;
 	}
 
@@ -128,9 +106,9 @@ void insert_node(tree *t, int32_t value)
 		t->height = height;
 
 	if (target_node->left == NULL)
-		target_node->left = n;
+		target_node->left = new;
 	else
-		target_node->right = n;
+		target_node->right = new;
 
 	return;
 }
@@ -241,34 +219,58 @@ int32_t delete_node(tree *t)
 	return return_value;
 }
 
-void preorder(node *n)
+void preorder_main(node *n)
 {
 	if (n == NULL)
 		return;
 
 	printf("%d\n", n->value);
-	preorder(n->left);
-	preorder(n->right);
+	preorder_main(n->left);
+	preorder_main(n->right);
 }
 
-void inorder(node *n)
+void preorder(tree *t)
 {
-	if (n == NULL)
-		return;
-
-	inorder(n->left);
-	printf("%d\n", n->value);
-	inorder(n->right);
+	puts("Pre-Order");
+	preorder_main(t->binary_tree);
+	putc('\n', stdout);
+	return;
 }
 
-void postorder(node *n)
+void inorder_main(node *n)
 {
 	if (n == NULL)
 		return;
 
-	postorder(n->left);
-	postorder(n->right);
+	inorder_main(n->left);
 	printf("%d\n", n->value);
+	inorder_main(n->right);
+}
+
+void inorder(tree *t)
+{
+	puts("In-Order");
+	inorder_main(t->binary_tree);
+	putc('\n', stdout);
+	return;
+}
+
+void postorder_main(node *n)
+{
+	if (n == NULL)
+		return;
+
+	postorder_main(n->left);
+	postorder_main(n->right);
+	printf("%d\n", n->value);
+}
+
+void postorder(tree *t)
+{
+	puts("Post-Order");
+	postorder_main(t->binary_tree);
+	putc('\n', stdout);
+	return;
 }
 
 void level_order_main(node *n, int32_t height)
@@ -294,6 +296,7 @@ void level_order_main(node *n, int32_t height)
 
 void level_order(tree *t)
 {
+	puts("Level-Order");
 	// It has to invoke for each level to print.
 	for (int i = 1; i <= t->height; i++)
 	{
@@ -358,18 +361,6 @@ node *search(tree *t, int32_t value)
 	return search_main(t->binary_tree, value);
 }
 
-path_node *make_path_node(path_node *prev, int32_t side)
-{
-	path_node *p = (path_node *)malloc(sizeof(path_node));
-	p->position = side == LEFT
-					  ? 'L'
-				  : side == RIGHT
-					  ? 'R'
-					  : '-';
-	p->next = prev;
-	return p;
-}
-
 path_node *find_path_main(node *n, int32_t value, int32_t side)
 {
 	/* If will recurse down in tree and check for the node
@@ -422,11 +413,10 @@ path_node *find_path(tree *t, int32_t value)
 	// This algorithm is baised towards left side search
 	return find_path_main(t->binary_tree, value, ROOT);
 }
-
-void destroy_tree(node *n)
+int32_t destroy_tree(node *n)
 {
 	if (n == NULL)
-		return;
+		return 0;
 
 	destroy_tree(n->left);
 	destroy_tree(n->right);
@@ -443,90 +433,5 @@ void destroy_tree(node *n)
 		to_free = n->right;
 		free(to_free);
 	}
-	return;
+	return 0;
 }
-
-void destroy(tree *t)
-{
-	destroy_tree(t->binary_tree);
-	t->binary_tree = NULL;
-	free(t);
-	puts("Tree Destroyed.");
-	return;
-}
-
-/*node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *level) {
-	if(n == NULL) {
-		return NULL;
-	}
-
-	int32_t left_size_current = 0;
-	int32_t right_size_current = 0;
-	int32_t level_current_left = 0;
-	int32_t level_current_right = 0;
-	node *to_return = NULL;
-
-	node *left = find_node(n->left, &left_size_current, &left_size_current, &level_current_left);
-	node *right = find_node(n->right, &right_size_current, &right_size_current, &level_current_right);
-
-	if(right == NULL) {
-		to_return = n;
-	}
-	else {
-		int32_t max_subtree_elem;
-		if(level_current_left > level_current_right) {
-			max_subtree_elem = (int32_t) ((pow(2, level_current_left + 1) - 2) / 2);
-		}
-		else {
-			max_subtree_elem = (int32_t) ((pow(2, level_current_right + 1) - 2) / 2);
-		}
-
-		if(left_size_current < max_subtree_elem) {
-			to_return = left;
-		}
-		else {
-			to_return = right;
-		}
-	}
-
-	(*left_size) += (left_size_current + 1);
-	(*right_size) += (right_size_current + 1);
-	(*level) = (level_current_left > level_current_right
-			   ? level_current_left
-			   : level_current_right) + 1;
-
-	return NULL;
-}*/
-
-/*node *left = find_node(n->left, level+1, LEFT, t);
-	node *right = find_node(n->right, level+1, RIGHT, t);
-
-	if(left == NULL && right == NULL) {
-		if(t->left > level) {
-			t->right = level;
-		} else {
-			if(type == LEFT)
-				t->left = level;
-			if(type == RIGHT)
-				t->right = level;
-		}
-		return n;
-	} else if(left != NULL && right == NULL) {
-		if(t->left > level) {
-			t->right = level;
-		} else {
-			if(type == LEFT)
-				t->left = level;
-			if(type == RIGHT)
-				t->right = level;
-		}
-		return n;
-	}
-	else {
-		if(t->left == t->right) {
-			return left;
-		}
-		if(t->left > t->right) {
-			return right;
-		}
-	}*/
