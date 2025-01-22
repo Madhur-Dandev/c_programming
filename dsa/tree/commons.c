@@ -14,6 +14,13 @@ tree *init_tree(void)
 	t->binary_tree = NULL;
 	t->insert_node = &insert_node;
 	t->delete_node = &delete_node;
+	t->preorder = &preorder;
+	t->inorder = &inorder;
+	t->postorder = &postorder;
+	t->level_order = &level_order;
+	t->find_smallest = &find_smallest;
+	t->find_largest = &find_largest;
+	t->search = &search;
 	t->find_path = &find_path;
 	t->destroy = &destroy;
 	return t;

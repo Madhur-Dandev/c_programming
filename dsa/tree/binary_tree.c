@@ -305,13 +305,13 @@ void level_order(tree *t)
 	return;
 }
 
-int32_t find_smallest(node *n)
+int32_t find_smallest_main(node *n)
 {
 	if (n == NULL)
 		return INT_MAX;
 
-	int32_t left = find_smallest(n->left);
-	int32_t right = find_smallest(n->right);
+	int32_t left = find_smallest_main(n->left);
+	int32_t right = find_smallest_main(n->right);
 
 	return left < right
 			   ? (left < n->value
@@ -322,12 +322,18 @@ int32_t find_smallest(node *n)
 					  : n->value);
 }
 
-int32_t find_largest(node *n)
+int32_t find_smallest(tree *t)
+{
+	return find_smallest_main(t->binary_tree);
+}
+
+int32_t find_largest_main(node *n)
 {
 	if (n == NULL)
 		return INT_MIN;
-	int32_t left = find_largest(n->left);
-	int32_t right = find_largest(n->right);
+	
+	int32_t left = find_largest_main(n->left);
+	int32_t right = find_largest_main(n->right);
 
 	return left > right
 			   ? (left > n->value
@@ -336,6 +342,11 @@ int32_t find_largest(node *n)
 			   : (right > n->value
 					  ? right
 					  : n->value);
+}
+
+int32_t find_largest(tree *t)
+{
+	return find_largest_main(t->binary_tree);
 }
 
 node *search_main(node *n, int32_t value)

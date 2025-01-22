@@ -30,6 +30,20 @@ int32_t add_child(node *n, list **tail)
 
 void insert_node(tree *t, int32_t value)
 {
+	/* *************Algorithm for finding parent node*************
+	 * create three variable for head pointer
+	 *
+	 * create a queue to store each node of tree
+	 * 
+	 * while loop:
+	 * 	if head don't have any left child:
+	 *   add node to left of the head
+	 *	else if head don't have any right child:
+	 *	 add node to right of the head
+	 *	else:
+	 *	 add left and right child of head to the list
+	 *	 increase head pointer by one
+	 */
 	node *new = build_node(value);
 	if (new == NULL)
 		return;
@@ -149,154 +163,6 @@ int32_t delete_node(tree *t)
 	to_return = to_delete->value;
 	free(to_delete);
 	return to_return;
-}
-
-path_node *find_path(tree *t, int32_t value)
-{
-	list *head, *tail, *to_free;
-	bool is_traceback = false;
-	path_node *path_head, *path_tail, *path_temp;
-	path_head = path_tail = path_temp = NULL;
-	head = tail = create_list_node(t->binary_tree);
-	to_free = NULL;
-
-	while (tail != NULL)
-	{	
-		if (is_traceback)
-		{
-			if(tail->n->right == to_free->n)
-			{
-				free(to_free);
-				to_free = tail;
-				tail = tail->prev;
-			}
-			else
-			{
-				free(to_free);
-				if (add_child(tail->n->right, &tail))
-				{
-					clear_list(head);
-					return NULL;
-				}
-				to_free = NULL;
-				is_traceback = false;
-			}
-		}
-		else
-		{
-			if(tail->n->value == value)
-				break;
-		
-			if (tail->n->left != NULL)
-			{
-				if (add_child(tail->n->left, &tail))
-				{
-					clear_list(head);
-					return NULL;
-				}
-			}
-			else
-			{
-				is_traceback = true;
-				to_free = tail;
-				tail = tail->prev;
-			}
-		}
-	}
-	
-	if(to_free == head)
-		head = NULL;
-
-	if(to_free)
-		free(to_free);
-
-	to_free = NULL;
-
-	while(head != NULL)
-	{
-		if(to_free == NULL)
-		{
-			path_head = path_tail = make_path_node(NULL, ROOT);
-			if(path_head == NULL)
-			{
-				clear_list(head);
-				return NULL;
-			}
-		}
-		else
-		{
-			path_temp = make_path_node(NULL, to_free->n->right == head->n
-											 ? RIGHT : LEFT);
-			path_tail->next = path_temp;
-			path_tail = path_temp;
-			free(to_free);
-
-		}
-		to_free = head;
-		head = head->next;
-	}
-	return path_head;
-}
-
-int32_t destroy_tree(node *n)
-{
-	list *head, *tail, *to_free;
-	head = tail = create_list_node(n);
-	node *to_delete;
-
-	while (head != NULL)
-	{
-		if (head->n->left)
-		{
-			if (add_child(head->n->left, &tail))
-			{
-				puts("Cannot destroy the tree.");
-				return 1;
-			}
-		}
-
-		if (head->n->right)
-		{
-			if (add_child(head->n->right, &tail))
-			{
-				puts("Cannot destroy the tree.");
-				return 1;
-			}
-		}
-
-		to_delete = head->n;
-		free(to_delete);
-		to_free = head;
-		head = head->next;
-		free(to_free);
-	}
-
-	return 0;
-}
-
-void level_order(tree *t)
-{
-	list *head, *tail, *to_free;
-	head = tail = create_list_node(t->binary_tree);
-
-	printf("Level-Order:\n");
-	while (head != NULL)
-	{
-		printf("%d\n", head->n->value);
-
-		if (add_child(head->n->left, &tail) ||
-			add_child(head->n->right, &tail))
-		{
-			clear_list(head);
-			puts("Unable to perform level-order traversal.");
-			return;
-		}
-
-		to_free = head;
-		head = head->next;
-		free(to_free);
-	}
-	putc('\n', stdout);
 }
 
 void preorder(tree *t)
@@ -468,4 +334,262 @@ void postorder(tree *t)
 	}
 	puts("");
 	return;
+}
+
+void level_order(tree *t)
+{
+	list *head, *tail, *to_free;
+	head = tail = create_list_node(t->binary_tree);
+
+	printf("Level-Order:\n");
+	while (head != NULL)
+	{
+		printf("%d\n", head->n->value);
+
+		if (add_child(head->n->left, &tail) ||
+			add_child(head->n->right, &tail))
+		{
+			clear_list(head);
+			puts("Unable to perform level-order traversal.");
+			return;
+		}
+
+		to_free = head;
+		head = head->next;
+		free(to_free);
+	}
+	putc('\n', stdout);
+}
+
+int32_t find_smallest(tree *t)
+{
+	list *head, *tail, *to_free;
+	head = tail = create_list_node(t->binary_tree);
+	to_free = NULL;
+	if(head == NULL)
+	{
+		puts("Unable to search.");
+		return INT_MIN;
+	}
+
+	int32_t result = head->n->value;
+	while(head)
+	{
+		if(result > head->n->value)
+			result = head->n->value;
+
+		if(add_child(head->n->left, &tail) ||
+			add_child(head->n->right, &tail))
+		{
+			clear_list(head);
+			puts("Unable to search.");
+			return INT_MIN;
+		}
+		if(to_free)
+			free(to_free);
+
+		to_free = head;
+		head = head->next;
+	}
+	
+	if(to_free)
+		free(head);
+	return result;
+}
+
+int32_t find_largest(tree *t)
+{
+	list *head, *tail, *to_free;
+	head = tail = create_list_node(t->binary_tree);
+	to_free = NULL;
+	if(head == NULL)
+	{
+		puts("Unable to search.");
+		return INT_MIN;
+	}
+
+	int32_t result = head->n->value;
+	while(head)
+	{
+		if(result < head->n->value)
+			result = head->n->value;
+
+		if(add_child(head->n->left, &tail) ||
+			add_child(head->n->right, &tail))
+		{
+			clear_list(head);
+			puts("Unable to search.");
+			return INT_MIN;
+		}
+		if(to_free)
+			free(to_free);
+
+		to_free = head;
+		head = head->next;
+	}
+	
+	if(to_free)
+		free(head);
+	return result;
+}
+
+node *search(tree *t, int32_t value)
+{
+	list *head, *tail, *to_free;
+	head = tail = create_list_node(t->binary_tree);
+	to_free = NULL;
+	node *target = NULL;
+	if(head == NULL)
+	{
+		puts("Unable to search.");
+		return target;
+	}
+
+	while(head)
+	{
+		if(head->n->value == value)
+		{
+			target = head->n;
+			clear_list(head);
+			return target;
+		}
+		
+		if(add_child(head->n->left, &tail) ||
+			add_child(head->n->right, &tail))
+		{
+			clear_list(head);
+			puts("Unable to search.");
+			return target;
+		}
+		if(to_free)
+			free(to_free);
+
+		to_free = head;
+		head = head->next;
+	}
+	if(to_free)
+		free(head);
+	return target;
+}
+path_node *find_path(tree *t, int32_t value)
+{
+	list *head, *tail, *to_free;
+	bool is_traceback = false;
+	path_node *path_head, *path_tail, *path_temp;
+	path_head = path_tail = path_temp = NULL;
+	head = tail = create_list_node(t->binary_tree);
+	to_free = NULL;
+
+	while (tail != NULL)
+	{	
+		if (is_traceback)
+		{
+			if(tail->n->right == to_free->n)
+			{
+				free(to_free);
+				to_free = tail;
+				tail = tail->prev;
+			}
+			else
+			{
+				free(to_free);
+				if (add_child(tail->n->right, &tail))
+				{
+					clear_list(head);
+					return NULL;
+				}
+				to_free = NULL;
+				is_traceback = false;
+			}
+		}
+		else
+		{
+			if(tail->n->value == value)
+				break;
+		
+			if (tail->n->left != NULL)
+			{
+				if (add_child(tail->n->left, &tail))
+				{
+					clear_list(head);
+					return NULL;
+				}
+			}
+			else
+			{
+				is_traceback = true;
+				to_free = tail;
+				tail = tail->prev;
+			}
+		}
+	}
+	
+	if(to_free == head)
+		head = NULL;
+
+	if(to_free)
+		free(to_free);
+
+	to_free = NULL;
+
+	while(head != NULL)
+	{
+		if(to_free == NULL)
+		{
+			path_head = path_tail = make_path_node(NULL, ROOT);
+			if(path_head == NULL)
+			{
+				clear_list(head);
+				return NULL;
+			}
+		}
+		else
+		{
+			path_temp = make_path_node(NULL, to_free->n->right == head->n
+											 ? RIGHT : LEFT);
+			path_tail->next = path_temp;
+			path_tail = path_temp;
+			free(to_free);
+
+		}
+		to_free = head;
+		head = head->next;
+	}
+	return path_head;
+}
+
+int32_t destroy_tree(node *n)
+{
+	list *head, *tail, *to_free;
+	head = tail = create_list_node(n);
+	node *to_delete;
+
+	while (head != NULL)
+	{
+		if (head->n->left)
+		{
+			if (add_child(head->n->left, &tail))
+			{
+				puts("Cannot destroy the tree.");
+				return 1;
+			}
+		}
+
+		if (head->n->right)
+		{
+			if (add_child(head->n->right, &tail))
+			{
+				puts("Cannot destroy the tree.");
+				return 1;
+			}
+		}
+
+		to_delete = head->n;
+		free(to_delete);
+		to_free = head;
+		head = head->next;
+		free(to_free);
+	}
+
+	return 0;
 }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include <limits.h>
 
 typedef struct tree_node node;
 typedef struct tracker tracker;
@@ -42,8 +43,15 @@ struct tree
 	int32_t height;	   // current height of tree
 	void (*insert_node)(tree *, int32_t);
 	int32_t (*delete_node)(tree *);
-	void (*destroy)(tree *);
+	void (*preorder)(tree *);
+	void (*inorder)(tree *);
+	void (*postorder)(tree *);
+	void (*level_order)(tree *);
+	int32_t (*find_smallest)(tree *);
+	int32_t (*find_largest)(tree *);
+	node *(*search)(tree *, int32_t);
 	path_node *(*find_path)(tree *, int32_t);
+	void (*destroy)(tree *);
 };
 
 struct path_node
@@ -64,8 +72,8 @@ void preorder(tree *);
 void inorder(tree *);
 void postorder(tree *);
 void level_order(tree *);
-int32_t find_smallest(node *);
-int32_t find_largest(node *);
+int32_t find_smallest(tree *);
+int32_t find_largest(tree *);
 node *search(tree *, int32_t);
 path_node *make_path_node(path_node *, int32_t);
 path_node *find_path(tree *, int32_t);
