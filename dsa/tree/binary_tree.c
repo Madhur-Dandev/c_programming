@@ -424,6 +424,7 @@ path_node *find_path(tree *t, int32_t value)
 	// This algorithm is baised towards left side search
 	return find_path_main(t->binary_tree, value, ROOT);
 }
+
 int32_t destroy_tree(node *n)
 {
 	if (n == NULL)

@@ -10,10 +10,10 @@ tree *init_tree(void)
 		puts("Unable to created tree. Allocation failed.");
 		return NULL;
 	}
-	t->height = 0;
 	t->binary_tree = NULL;
 	t->insert_node = &insert_node;
 	t->delete_node = &delete_node;
+	t->get_height = &get_height;
 	t->preorder = &preorder;
 	t->inorder = &inorder;
 	t->postorder = &postorder;
@@ -94,4 +94,15 @@ path_node *make_path_node(path_node *prev, int32_t side)
 		p->position = side;
         p->next = prev;
         return p;
+}
+
+int32_t get_height_main(node *root)
+{
+	if(!root)
+		return 0;
+
+	int32_t left = get_height_main(root->left);
+	int32_t right = get_height_main(root->right);
+	
+	return left > right ? left + 1 : right + 1;
 }

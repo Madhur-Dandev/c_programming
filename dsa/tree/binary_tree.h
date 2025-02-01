@@ -1,6 +1,7 @@
 #ifndef BINARY_TREE_H
 #define BINARY_TREE_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <inttypes.h>
@@ -40,9 +41,13 @@ struct tree_node_list
 struct tree
 {
 	node *binary_tree; // address of root node of tree
-	int32_t height;	   // current height of tree
 	void (*insert_node)(tree *, int32_t);
+#ifdef BT
 	int32_t (*delete_node)(tree *);
+#else
+	void (*delete_node)(tree *, int32_t value);
+#endif
+	int32_t (*get_height)(tree *);
 	void (*preorder)(tree *);
 	void (*inorder)(tree *);
 	void (*postorder)(tree *);
@@ -67,7 +72,13 @@ void clear_list(list *);
 node *find_node(node *, int32_t *, int32_t *, int32_t *, int32_t);
 void insert_node(tree *, int32_t);
 node *find_parent_node(node *, int32_t *, int32_t *, int32_t *, int32_t);
+#ifdef BT
 int32_t delete_node(tree *);
+#else
+void delete_node(tree *, int32_t);
+#endif
+int32_t get_height_main(node *);
+int32_t get_height(tree *);
 void preorder(tree *);
 void inorder(tree *);
 void postorder(tree *);

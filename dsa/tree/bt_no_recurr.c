@@ -1,3 +1,5 @@
+// add tracking of height when adding or deleting node
+
 #include "binary_tree.h"
 #include <stdio.h>
 #include <stdlib.h>
