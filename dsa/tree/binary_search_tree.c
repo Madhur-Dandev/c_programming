@@ -215,9 +215,10 @@ node *search_main(node *root, int32_t target)
 {
 	if(!root)
 		return NULL;
+	if(root->value == target)
+		return root;
 
-	node *value = search_main(root->value > target ? root->left : root->right, target);
-	return !value ? root : value;
+	return search_main(root->value > target ? root->left : root->right, target);
 }
 
 node *search(tree *t, int32_t value)
@@ -225,9 +226,24 @@ node *search(tree *t, int32_t value)
 	return search_main(t->binary_tree, value);
 }
 
+path_node *find_path_main(node *root, int32_t target, int32_t side)
+{
+	if(!root)
+		return NULL;
+	if(root->value == target)
+		return make_path_node(NULL, side);
+
+	path_node *value = find_path_main(root->value > target ? root->left : root->right, target, root->value > target ? LEFT : RIGHT);
+
+	path_node *new = NULL;
+	if(value)
+		new = make_path_node(value, side);
+	return new;
+}
+
 path_node *find_path(tree *t, int32_t value)
 {
-	return NULL;
+	return find_path_main(t->binary_tree, value, ROOT);
 }
 
 int32_t destroy_tree(node *n)
