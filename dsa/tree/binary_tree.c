@@ -4,14 +4,14 @@
 #include <limits.h>
 #include "binary_tree.h"
 
-node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *height, int32_t side)
+node *find_parent_main(node *root, int32_t *left_size, int32_t *right_size, int32_t *height, int32_t side)
 {
 	/* recursive function for finding parent node for child
 	 * node insertion. This function find the parent node
 	 * level-order wise.
 	 */
 
-	if (n == NULL)
+	if (root == NULL)
 	{
 		return NULL;
 	}
@@ -22,12 +22,12 @@ node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *heigh
 	int32_t height_current_right = 0; // variable for getting height of right subtree
 	node *to_return = NULL;			  // address to return
 
-	node *left = find_node(n->left, &left_size_current, &left_size_current, &height_current_left, LEFT);	   // recurse down left
-	node *right = find_node(n->right, &right_size_current, &right_size_current, &height_current_right, RIGHT); // recurse down right
+	node *left = find_parent_main(root->left, &left_size_current, &left_size_current, &height_current_left, LEFT);	   // recurse down left
+	node *right = find_parent_main(root->right, &right_size_current, &right_size_current, &height_current_right, RIGHT); // recurse down right
 
 	if (right == NULL)
 	{
-		to_return = n;
+		to_return = root;
 	}
 	else
 	{
@@ -84,7 +84,14 @@ node *find_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *heigh
 	return to_return;
 }
 
-void insert_node(tree *t, int32_t value)
+node *find_parent(node *root)
+{
+	int32_t left_size, right_size, height;
+	left_size = right_size = height = 0;
+	return find_parent_main(root, &left_size, &right_size, &height, ROOT);
+}
+
+/*void insert_node(tree *t, int32_t value)
 {	
 	node *new = build_node(value);
 	if(!new)
@@ -111,7 +118,7 @@ void insert_node(tree *t, int32_t value)
 		target_node->right = new;
 
 	return;
-}
+}*/
 
 node *find_parent_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *height, int32_t side)
 {
@@ -213,10 +220,12 @@ int32_t delete_node(tree *t)
 		free(to_free);
 	}
 
-	if (height < t->height)
-		t->height = height;
-
 	return return_value;
+}
+
+int32_t get_height_main(node *root)
+{
+	return !root ? 0 : get_height_main(root->left) + 1;
 }
 
 void preorder_main(node *n)
@@ -297,8 +306,9 @@ void level_order_main(node *n, int32_t height)
 void level_order(tree *t)
 {
 	puts("Level-Order");
+	int32_t height = t->get_height(t);
 	// It has to invoke for each level to print.
-	for (int i = 1; i <= t->height; i++)
+	for (int i = 1; i <= height; i++)
 	{
 		level_order_main(t->binary_tree, i);
 	}

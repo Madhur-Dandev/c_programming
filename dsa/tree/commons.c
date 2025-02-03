@@ -2,6 +2,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+void insert_node(tree *t, int32_t value)
+{
+	node *new = build_node(value);
+
+	if(!new)
+	{
+		puts("Insertion failed.");
+		return;
+	}
+	
+#ifdef BT
+	node *parent = find_parent(t->binary_tree);
+#else
+	node *parent = find_parent(t->binary_tree, value);
+#endif
+
+	if(!parent)
+		t->binary_tree = new;
+#ifdef BT
+	else if(!(parent->left))
+		parent->left = new;
+	else
+		parent->right = new;
+#else
+	else if(parent->value < value)
+		parent->right = new;
+	else
+		parent->left = new;
+#endif
+
+	puts("Node inserted successfully.");
+	return;
+}
+
 tree *init_tree(void)
 {
 	tree *t = (tree *)malloc(sizeof(tree));
@@ -96,7 +131,7 @@ path_node *make_path_node(path_node *prev, int32_t side)
         return p;
 }
 
-int32_t get_height_main(node *root)
+/*int32_t get_height_main(node *root)
 {
 	if(!root)
 		return 0;
@@ -105,4 +140,9 @@ int32_t get_height_main(node *root)
 	int32_t right = get_height_main(root->right);
 	
 	return left > right ? left + 1 : right + 1;
+}*/
+
+int32_t get_height(tree *t)
+{
+	return get_height_main(t->binary_tree);
 }

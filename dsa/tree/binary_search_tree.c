@@ -21,7 +21,7 @@ node *find_parent(node *root, int32_t value)
 	}
 }
 
-void insert_node(tree *t, int32_t value)
+/*void insert_node(tree *t, int32_t value)
 {
 	node *new = build_node(value);
 
@@ -42,7 +42,7 @@ void insert_node(tree *t, int32_t value)
 
 	puts("Node inserted successfully.");
 	return;
-}
+}*/
 
 node *logic(node **root, bool have_parent, int32_t value)
 {
@@ -91,9 +91,15 @@ void delete_node(tree *t, int32_t value)
 	return;
 }
 
-int get_height(tree *t)
+int32_t get_height_main(node *root)
 {
-	return get_height_main(t->binary_tree);
+	if(!root)
+		return 0;
+
+	int32_t left = get_height_main(root->left);
+	int32_t right = get_height_main(root->right);
+
+	return (left > right ? left : right) + 1;
 }
 
 void preorder_main(node *n)
