@@ -48,6 +48,7 @@ struct tree
 	void (*delete_node)(tree *, int32_t value);
 #endif
 	int32_t (*get_height)(tree *);
+	int32_t (*get_node_level)(tree *, int32_t);
 	void (*preorder)(tree *);
 	void (*inorder)(tree *);
 	void (*postorder)(tree *);
@@ -83,6 +84,8 @@ void delete_node(tree *, int32_t);
 #endif
 int32_t get_height_main(node *);
 int32_t get_height(tree *);
+int32_t get_node_level_main(node *, int32_t);
+int32_t get_node_level(tree *, int32_t);
 void preorder(tree *);
 void inorder(tree *);
 void postorder(tree *);

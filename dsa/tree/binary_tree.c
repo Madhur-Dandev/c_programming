@@ -91,35 +91,6 @@ node *find_parent(node *root)
 	return find_parent_main(root, &left_size, &right_size, &height, ROOT);
 }
 
-/*void insert_node(tree *t, int32_t value)
-{	
-	node *new = build_node(value);
-	if(!new)
-	{
-		puts("Cannot insert the value in tree.");
-		return;
-	}
-
-	if (t->binary_tree == NULL)
-	{
-		t->binary_tree = new;
-		return;
-	}
-
-	int32_t left_size, right_size, height;
-	left_size = right_size = height = 0;
-	node *target_node = find_node(t->binary_tree, &left_size, &right_size, &height, ROOT);
-	if (height > t->height)
-		t->height = height;
-
-	if (target_node->left == NULL)
-		target_node->left = new;
-	else
-		target_node->right = new;
-
-	return;
-}*/
-
 node *find_parent_node(node *n, int32_t *left_size, int32_t *right_size, int32_t *height, int32_t side)
 {
 	/* Same as the function use to find the parent element for
@@ -226,6 +197,30 @@ int32_t delete_node(tree *t)
 int32_t get_height_main(node *root)
 {
 	return !root ? 0 : get_height_main(root->left) + 1;
+}
+
+int32_t get_node_level_main(node *root, int32_t target)
+{
+	if(!root)
+		return -1;
+	if(root->value == target)
+		return 0;
+
+	int32_t left = get_node_level_main(root->left, target);
+	int32_t right = get_node_level_main(root->right, target);
+
+	if(left >= 0)
+	{
+		return left + 1;
+	}
+	else if(right >= 0)
+	{
+		return right + 1;
+	}
+	else
+	{
+		return -1;
+	}
 }
 
 void preorder_main(node *n)

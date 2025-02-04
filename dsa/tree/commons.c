@@ -49,6 +49,7 @@ tree *init_tree(void)
 	t->insert_node = &insert_node;
 	t->delete_node = &delete_node;
 	t->get_height = &get_height;
+	t->get_node_level = &get_node_level;
 	t->preorder = &preorder;
 	t->inorder = &inorder;
 	t->postorder = &postorder;
@@ -145,4 +146,9 @@ path_node *make_path_node(path_node *prev, int32_t side)
 int32_t get_height(tree *t)
 {
 	return get_height_main(t->binary_tree);
+}
+
+int32_t get_node_level(tree *t, int32_t target)
+{
+	return get_node_level_main(t->binary_tree, target);
 }

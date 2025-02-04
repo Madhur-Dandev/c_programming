@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
 int32_t add_child(node *n, list **tail)
 {
@@ -221,6 +222,63 @@ int32_t get_height_main(node *root)
 	}
 	
 	return height;
+}
+
+int32_t get_node_level_main(node *root, int32_t target)
+{
+	int32_t level = 0;
+	int32_t total_element_in_level = (int32_t) pow(2, (int32_t) level);
+	int32_t *teil = &total_element_in_level;
+
+	list *head, *tail, *to_free;
+	head = tail = create_list_node(root);
+
+	while(head)
+	{
+		if(head->n->value == target)
+		{
+			return level;
+		}
+
+		(*teil)--;
+		if(*teil == 0)
+		{
+			level++;
+			*teil = pow(2, (int32_t) level);
+		}
+
+		if(head->n->left)
+		{
+			if(add_child(head->n->left, &tail))
+			{
+				clear_list(head);
+				return -1;
+			}
+		}
+		else
+		{
+			(*teil)--;
+		}
+
+		if(head->n->right)
+		{
+			if(add_child(head->n->right, &tail))
+			{
+				clear_list(head);
+				return -1;
+			}
+		}
+		else
+		{
+			(*teil)--;
+		}
+
+		to_free = head;
+		head = head->next;
+		free(to_free);
+	}
+
+	return -1;
 }
 
 void preorder(tree *t)
