@@ -1,4 +1,7 @@
-// add tracking of height when adding or deleting node
+// fix linking error due to mismatch function name:
+// search -> search_main
+// find_largest -> find_largest_main
+// find_smallest -> find_smallest_main
 
 #include "binary_tree.h"
 #include <stdio.h>
@@ -281,13 +284,12 @@ int32_t get_node_level_main(node *root, int32_t target)
 	return -1;
 }
 
-void preorder(tree *t)
+void preorder_main(node *root)
 {
 	list *head, *tail, *to_free, *temp;
-	head = tail = create_list_node(t->binary_tree);
+	head = tail = create_list_node(root);
 	bool is_traceback = false;
 
-	printf("Pre-Order:\n");
 	while(tail != NULL)
 	{
 		if(is_traceback)
@@ -333,18 +335,16 @@ void preorder(tree *t)
 		}
 	}
 
-	putc('\n', stdout);
 	return;
 }
 
-void inorder(tree *t)
+void inorder_main(node *root)
 {
 	list *head, *tail, *to_free;
-	head = tail = create_list_node(t->binary_tree);
+	head = tail = create_list_node(root);
 	to_free = NULL;
 	bool is_traceback = false;
 
-	printf("In-Order:\n");
 	while (tail != NULL)
 	{
 		if (to_free)
@@ -388,19 +388,18 @@ void inorder(tree *t)
 		printf("%d\n", to_free->n->value);
 		free(to_free);
 	}
-	puts("");
+
 	return;
 }
 
-void postorder(tree *t)
+void postorder_main(node *root)
 {
 	list *head, *tail, *to_free;
 	bool is_traceback = false;
 
-	head = tail = create_list_node(t->binary_tree);
+	head = tail = create_list_node(root);
 	to_free = NULL;
 
-	printf("Post-Order:\n");
 	while (tail != NULL)
 	{
 		if (is_traceback)
@@ -448,16 +447,15 @@ void postorder(tree *t)
 		printf("%d\n", to_free->n->value);
 		free(to_free);
 	}
-	puts("");
+	
 	return;
 }
 
-void level_order(tree *t)
+void level_order_main(node *root)
 {
 	list *head, *tail, *to_free;
-	head = tail = create_list_node(t->binary_tree);
+	head = tail = create_list_node(root);
 
-	printf("Level-Order:\n");
 	while (head != NULL)
 	{
 		printf("%d\n", head->n->value);
@@ -474,13 +472,21 @@ void level_order(tree *t)
 		head = head->next;
 		free(to_free);
 	}
+
+	return;
+}
+
+void level_order(tree *t)
+{
+	puts("Level-order");
+	level_order_main(t->binary_tree);
 	putc('\n', stdout);
 }
 
-int32_t find_smallest(tree *t)
+int32_t find_smallest_main(node *root)
 {
 	list *head, *tail, *to_free;
-	head = tail = create_list_node(t->binary_tree);
+	head = tail = create_list_node(root);
 	to_free = NULL;
 	if(head == NULL)
 	{
@@ -587,6 +593,7 @@ node *search(tree *t, int32_t value)
 		free(head);
 	return target;
 }
+
 path_node *find_path(tree *t, int32_t value)
 {
 	list *head, *tail, *to_free;

@@ -152,3 +152,42 @@ int32_t get_node_level(tree *t, int32_t target)
 {
 	return get_node_level_main(t->binary_tree, target);
 }
+
+void preorder(tree *t)
+{
+	puts("Pre-Order");
+	preorder_main(t->binary_tree);
+	putc('\n', stdout);
+	return;
+}
+
+void inorder(tree *t)
+{
+	puts("In-Order");
+	inorder_main(t->binary_tree);
+	putc('\n', stdout);
+	return;
+}
+
+void postorder(tree *t)
+{
+	puts("Post-Order");
+	postorder_main(t->binary_tree);
+	putc('\n', stdout);
+	return;
+}
+
+int32_t find_smallest(tree *t)
+{
+	return find_smallest_main(t->binary_tree);
+}
+
+int32_t find_largest(tree *t)
+{
+	return find_largest_main(t->binary_tree);
+}
+
+node *search(tree *t, int32_t target)
+{
+	return search_main(t->binary_tree, target);
+}
