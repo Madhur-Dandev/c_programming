@@ -233,14 +233,6 @@ void preorder_main(node *n)
 	preorder_main(n->right);
 }
 
-/*void preorder(tree *t)
-{
-	puts("Pre-Order");
-	preorder_main(t->binary_tree);
-	putc('\n', stdout);
-	return;
-}*/
-
 void inorder_main(node *n)
 {
 	if (n == NULL)
@@ -251,14 +243,6 @@ void inorder_main(node *n)
 	inorder_main(n->right);
 }
 
-/*void inorder(tree *t)
-{
-	puts("In-Order");
-	inorder_main(t->binary_tree);
-	putc('\n', stdout);
-	return;
-}*/
-
 void postorder_main(node *n)
 {
 	if (n == NULL)
@@ -268,14 +252,6 @@ void postorder_main(node *n)
 	postorder_main(n->right);
 	printf("%d\n", n->value);
 }
-
-/*void postorder(tree *t)
-{
-	puts("Post-Order");
-	postorder_main(t->binary_tree);
-	putc('\n', stdout);
-	return;
-}*/
 
 void level_order_main(node *n, int32_t height)
 {
@@ -326,11 +302,6 @@ int32_t find_smallest_main(node *n)
 					  : n->value);
 }
 
-/*int32_t find_smallest(tree *t)
-{
-	return find_smallest_main(t->binary_tree);
-}*/
-
 int32_t find_largest_main(node *n)
 {
 	if (n == NULL)
@@ -347,11 +318,6 @@ int32_t find_largest_main(node *n)
 					  ? right
 					  : n->value);
 }
-
-/*int32_t find_largest(tree *t)
-{
-	return find_largest_main(t->binary_tree);
-}*/
 
 node *search_main(node *n, int32_t value)
 {
@@ -370,11 +336,6 @@ node *search_main(node *n, int32_t value)
 
 	return left != NULL ? left : right;
 }
-
-/*node *search(tree *t, int32_t value)
-{
-	return search_main(t->binary_tree, value);
-}*/
 
 path_node *find_path_main(node *n, int32_t value, int32_t side)
 {

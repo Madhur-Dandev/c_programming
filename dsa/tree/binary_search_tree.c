@@ -37,7 +37,10 @@ node *logic(node **root, bool have_parent, int32_t value)
 			if(to_free->right)
 			{
 				node *target = find_parent(to_free->left, to_free->right->value);
-				target->right = to_free->right;
+				if(!target)
+					*root = to_free->right;
+				else
+					target->right = to_free->right;
 			}
 		}
 		else
@@ -103,14 +106,6 @@ void preorder_main(node *n)
 	preorder_main(n->right);
 }
 
-/*void preorder(tree *t)
-{
-	puts("Pre-Order");
-	preorder_main(t->binary_tree);
-	putc('\n', stdout);
-	return;
-}*/
-
 void inorder_main(node *n)
 {
 	if (n == NULL)
@@ -121,14 +116,6 @@ void inorder_main(node *n)
 	inorder_main(n->right);
 }
 
-/*void inorder(tree *t)
-{
-	puts("In-Order");
-	inorder_main(t->binary_tree);
-	putc('\n', stdout);
-	return;
-}*/
-
 void postorder_main(node *n)
 {
 	if (n == NULL)
@@ -138,14 +125,6 @@ void postorder_main(node *n)
 	postorder_main(n->right);
 	printf("%d\n", n->value);
 }
-
-/*void postorder(tree *t)
-{
-	puts("Post-Order");
-	postorder_main(t->binary_tree);
-	putc('\n', stdout);
-	return;
-}*/
 
 void level_order_main(node *n, int32_t height)
 {
@@ -174,7 +153,7 @@ void level_order(tree *t)
 	int32_t height = t->get_height(t);
 	for (int i = 1; i <= height; i++)
 	{
-		level_order_main(root, i);
+		level_order_main(t->binary_tree, i);
 	}
 	return;
 }
@@ -188,11 +167,6 @@ int32_t find_smallest_main(node *root)
 	return value == 0 ? root->value : value;
 }
 
-/*int32_t find_smallest(tree *t)
-{
-	return 0;
-}*/
-
 int32_t find_largest_main(node *root)
 {
 	if(!root)
@@ -201,11 +175,6 @@ int32_t find_largest_main(node *root)
 	int32_t value = find_largest_main(root->right);
 	return value == 0 ? root->value : value;
 }
-
-/*int32_t find_largest(tree *t)
-{
-	return 0;
-}*/
 
 node *search_main(node *root, int32_t target)
 {
@@ -216,11 +185,6 @@ node *search_main(node *root, int32_t target)
 
 	return search_main(root->value > target ? root->left : root->right, target);
 }
-
-/*node *search(tree *t, int32_t value)
-{
-	return search_main(t->binary_tree, value);
-}*/
 
 path_node *find_path_main(node *root, int32_t target, int32_t side)
 {

@@ -519,10 +519,10 @@ int32_t find_smallest_main(node *root)
 	return result;
 }
 
-int32_t find_largest(tree *t)
+int32_t find_largest_main(node *root)
 {
 	list *head, *tail, *to_free;
-	head = tail = create_list_node(t->binary_tree);
+	head = tail = create_list_node(root);
 	to_free = NULL;
 	if(head == NULL)
 	{
@@ -555,10 +555,10 @@ int32_t find_largest(tree *t)
 	return result;
 }
 
-node *search(tree *t, int32_t value)
+node *search_main(node *root, int32_t value)
 {
 	list *head, *tail, *to_free;
-	head = tail = create_list_node(t->binary_tree);
+	head = tail = create_list_node(root);
 	to_free = NULL;
 	node *target = NULL;
 	if(head == NULL)
