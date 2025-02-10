@@ -65,66 +65,6 @@ node *find_parent(node *root)
 	return NULL;
 }
 
-//void insert_node(tree *t, int32_t value)
-//{
-	/* *************Algorithm for finding parent node*************
-	 * create three variable for head pointer
-	 *
-	 * create a queue to store each node of tree
-	 * 
-	 * while loop:
-	 * 	if head don't have any left child:
-	 *   add node to left of the head
-	 *	else if head don't have any right child:
-	 *	 add node to right of the head
-	 *	else:
-	 *	 add left and right child of head to the list
-	 *	 increase head pointer by one
-	 */
-/*	node *new = build_node(value);
-	if (new == NULL)
-		return;
-
-	if (t->binary_tree == NULL)
-	{
-		t->binary_tree = new;
-	}
-	else
-	{
-		list *head, *tail, *to_free;
-		head = tail = create_list_node(t->binary_tree);
-		while (head != NULL)
-		{
-			if (head->n->left == NULL)
-			{
-				head->n->left = new;
-				break;
-			}
-			else if (head->n->right == NULL)
-			{
-				head->n->right = new;
-				break;
-			}
-			else
-			{
-				if (add_child(head->n->left, &tail) ||
-					add_child(head->n->right, &tail))
-				{
-					clear_list(head);
-					puts("Cannot insert the value in tree.");
-					return;
-				}
-
-				to_free = head;
-				head = head->next;
-				free(to_free);
-			}
-		}
-	}
-	puts("Value inserted in tree");
-	return;
-}*/
-
 int32_t delete_node(tree *t)
 {
 	if (t->binary_tree == NULL)
