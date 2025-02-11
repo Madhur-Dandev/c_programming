@@ -1,3 +1,5 @@
+// changes: find_parent function should return the parent's address
+// 			instead of parent's structure
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -11,13 +13,17 @@ struct node
 
 struct node *create_node(int32_t);
 int32_t calculate_height(struct node *);
+void check_balance(struct node **);
 void insertion(struct node **, int32_t);
-struct node *find_parent(struct node *, int32_t);
+struct node **find_parent(struct node **, int32_t);
 void rotate_left(struct node **);
 void rotate_left_right(struct node **);
 void rotate_right(struct node **);
 void rotate_right_left(struct node **);
+void delete_node(struct node **, int32_t);
+void preorder(struct node *);
 void inorder(struct node *);
+void postorder(struct node *);
 void destroy(struct node **);
 
 int32_t main(void)
@@ -27,7 +33,7 @@ int32_t main(void)
 	insertion(&root, 20);
 	insertion(&root, 15);*/
 	//insertion(&root, 30);
-	insertion(&root, 50);
+	/*insertion(&root, 50);
 	insertion(&root, 30);
 	insertion(&root, 70);
 	insertion(&root, 20);
@@ -38,7 +44,21 @@ int32_t main(void)
 	insertion(&root, 25);
 	insertion(&root, 35);
 	insertion(&root, 45);
-	insertion(&root, 36);
+	//insertion(&root, 36);
+	//delete_node(&root, 45);
+	//delete_node(&root, 40);
+	//delete_node(&root, 30);
+	delete_node(&root, 50);*/
+	for(int32_t i = 0; i < 10; i++)
+	{
+		insertion(&root, 1);	
+	}
+
+	delete_node(&root, 3);
+	delete_node(&root, 7);
+
+	preorder(root);
+	putc('\n', stdout);
 	inorder(root);
 	printf("%d\n", calculate_height(root->left) - calculate_height(root->right));
 	destroy(&root);
@@ -67,37 +87,10 @@ int32_t calculate_height(struct node *root)
 	return (left > right ? left : right) + 1;
 }
 
-void insertion(struct node **root, int32_t target)
+void check_balance(struct node **root)
 {
 	if(!(*root))
-	{
-		*root = create_node(target);
 		return;
-	}
-
-	if((*root)->value > target && !((*root)->left))
-	{
-		struct node *new = create_node(target);
-		if(!new)
-			return;
-	
-		(*root)->left = new;
-	}
-	else if((*root)->value < target && !((*root)->right))
-	{
-		struct node *new = create_node(target);
-		if(!new)
-			return;
-	
-		(*root)->right = new;
-	}
-	else
-	{
-		insertion((*root)->value > target
-				  ? &(*root)->left
-				  : &(*root)->right, target);
-	}
-
 
 	int32_t left_height, right_height, child_left_height, child_right_height;
 	int32_t difference, child_difference;
@@ -134,24 +127,65 @@ void insertion(struct node **root, int32_t target)
 		else
 			rotate_left(root);
 	}
+	
+	return;
 }
 
-struct node *find_parent(struct node *root, int32_t value)
+void insertion(struct node **root, int32_t value)
+{
+	if(!(*root))
+	{
+		*root = create_node(value);
+		return;
+	}
+
+	if((*root)->value == value)
+		return;
+
+	if((*root)->value > value && !((*root)->left))
+	{
+		struct node *new = create_node(value);
+		if(!new)
+			return;
+	
+		(*root)->left = new;
+	}
+	else if((*root)->value < value && !((*root)->right))
+	{
+		struct node *new = create_node(value);
+		if(!new)
+			return;
+	
+		(*root)->right = new;
+	}
+	else
+	{
+		insertion((*root)->value > value
+				  ? &(*root)->left
+				  : &(*root)->right, value);
+	}
+
+	check_balance(root);
+
+	return;
+}
+
+struct node **find_parent(struct node **root, int32_t value)
 {
         if(!root)
         	return NULL;
         
-        if(root->value < value)
+        if((*root)->value < value)
         {
-            if(root->right)
-            	return find_parent(root->right, value);
+            if((*root)->right)
+            	return find_parent((&(*root)->right), value);
             else
                 return root;
         }
         else
         {
-            if(root->left)
-                return find_parent(root->left, value);
+            if((*root)->left)
+                return find_parent(&((*root)->left), value);
             else
                 return root;
         }
@@ -167,11 +201,11 @@ void rotate_left(struct node **root)
 	if(!temp)
 		return;
 	
-	struct node *parent = find_parent(*root, temp->value);
-	if(temp->value > parent->value)
-		parent->right = temp;
+	struct node **parent = find_parent(root, temp->value);
+	if(temp->value > (*parent)->value)
+		(*parent)->right = temp;
 	else
-		parent->left = temp;
+		(*parent)->left = temp;
 }
 
 void rotate_right(struct node **root)
@@ -184,11 +218,11 @@ void rotate_right(struct node **root)
 	if(!temp)
 		return;
 	
-	struct node *parent = find_parent(*root, temp->value);
-	if(temp->value > parent->value)
-		parent->right = temp;
+	struct node **parent = find_parent(root, temp->value);
+	if(temp->value > (*parent)->value)
+		(*parent)->right = temp;
 	else
-		parent->left = temp;
+		(*parent)->left = temp;
 }
 
 void rotate_left_right(struct node **root)
@@ -203,6 +237,57 @@ void rotate_right_left(struct node **root)
 	rotate_left(root);
 }
 
+void delete_node(struct node **root, int32_t target)
+{
+	if(!(*root))
+	{
+		puts("No such element.");
+		return;
+	}
+
+	if((*root)->value == target)
+	{
+		struct node *to_free = *root;
+		if((*root)->left && (*root)->right)
+		{
+			*root = (*root)->left;
+			struct node **parent = find_parent(root, to_free->right->value);
+			(*parent)->right = to_free->right;
+			check_balance(parent);
+		}
+		else if((*root)->left || (*root)->right)
+		{
+			*root = (*root)->left ? (*root)->left : (*root)->right;
+		}
+		else
+		{
+			*root = NULL;
+		}
+		free(to_free);
+	}
+	else
+	{
+		delete_node((*root)->value > target
+					? &((*root)->left)
+					: &((*root)->right), target);
+	}
+
+	check_balance(root);
+	return;
+}
+
+void preorder(struct node *root)
+{
+	if(!root)
+		return;
+
+	printf("%d\n", root->value);
+	preorder(root->left);
+	preorder(root->right);
+	
+	return;
+}
+
 void inorder(struct node *root)
 {
 	if(!root)
@@ -212,6 +297,18 @@ void inorder(struct node *root)
 	printf("%d\n", root->value);
 	inorder(root->right);
 	
+	return;
+}
+
+void postorder(struct node *root)
+{
+	if(!root)
+		return;
+
+	inorder(root->left);
+	inorder(root->right);
+	printf("%d\n", root->value);
+
 	return;
 }
 
