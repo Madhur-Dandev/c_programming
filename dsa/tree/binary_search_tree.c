@@ -57,21 +57,6 @@ node *handle_deletion(node **root, int32_t value)
 	}
 }
 
-/*void delete_node(tree *t, int32_t value)
-{
-	node *n = logic(&(t->binary_tree), false, value);
-	if(!n)
-	{
-		puts("No such element.");
-	}
-	else
-	{
-		printf("%d\n", n->value);
-		free(n);
-	}
-	return;
-}*/
-
 int32_t get_height_main(node *root)
 {
 	if(!root)

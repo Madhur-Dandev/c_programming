@@ -44,8 +44,8 @@ node *find_parent(node *root)
 	 * Logic:
 	 * 1. each node of tree is added to queue.
 	 * 2. The nodes will be check for following:
-	 *    i. if missing any one child then return
-	 		 that node.
+	 *    i. if missing both or any one of child 
+	 		 then return that node.
 	 *   ii. else add both left and right child
 	 		 to the queue.
 	 */
@@ -84,7 +84,8 @@ node *handle_deletion(node **root)
 	 * to the queue (level-order wise).
 	 * following condition will be checked:
 	 * 1. if no left child for current element then
-	 	  then return preceeding element, if available			else return current element.
+	 	  then return preceeding element, if available
+		  else return current element.
 	 * 2. if only left is present return current.
 	 * 3. else add subsequent childs to the queue.
 	 */
@@ -159,6 +160,10 @@ node *handle_deletion(node **root)
 
 int32_t get_height_main(node *root)
 {
+	/* Since the tree is filled level-order wise
+	 * We'll only check high from root to the left-most
+	 * element in the tree.
+	 */
 	int32_t height = 0;
 
 	list *head, *tail, *to_free;
@@ -182,7 +187,19 @@ int32_t get_height_main(node *root)
 }
 
 int32_t get_node_level_main(node *root, int32_t target)
-{
+{	
+	/* Start with level 0
+	 * return the level if node value matches the target
+	 * else reduce teil(total elements in level which is
+	 * calculated by 2^level
+	 * Since we are dealing with level-order wise checking
+	 * we need to reduce teil by 1 everytime we check a
+	 * node. When teil come back to 0, we increase level
+	 * and re-calculate teil
+	 * Repeat this until we found our node.
+	 * If no node found with target value return or any
+	 * error occured return -1.
+	 */
 	int32_t level = 0;
 	int32_t total_element_in_level = (int32_t) pow(2, (int32_t) level);
 	int32_t *teil = &total_element_in_level;
@@ -240,6 +257,18 @@ int32_t get_node_level_main(node *root, int32_t target)
 
 void preorder_main(node *root)
 {
+	/* Make a stack and insert root node.
+	 * Print the value of current node.
+	 * Then if left node is present, add it to stack
+	 * else pop the current node from stack and
+	 * traceback to previous node in stack
+	 * pop the currently pointed node
+	 * if poped node have right node then add it to
+	 * stack
+	 * else traceback to previous node
+	 * do it until stack get empty and no nodes from
+	 * tree are remained visited.
+	 */
 	list *head, *tail, *to_free, *temp;
 	head = tail = create_list_node(root);
 	bool is_traceback = false;
@@ -294,6 +323,15 @@ void preorder_main(node *root)
 
 void inorder_main(node *root)
 {
+	/* Make a stack and insert the root
+	 * Add the left node if available
+	 * else print the value of current node
+	 * pop that node and traceback
+	 * pop the tracebacked node and check if
+	 * it has right child. If yes, add it to
+	 * stack.
+	 * Repeat this until stack is empty
+	 */
 	list *head, *tail, *to_free;
 	head = tail = create_list_node(root);
 	to_free = NULL;
@@ -348,6 +386,16 @@ void inorder_main(node *root)
 
 void postorder_main(node *root)
 {
+	/* Make a stack and add root node
+	 * If left element is available
+	 * then add to it to stack
+	 * else print the value of current element
+	 * pop the node an traceback
+	 * check if tracebacked node have right node
+	 * if yes then add to stack
+	 * else print the value of tracebacked node and pop the tracebacked node
+	 * do it until stack gets empty
+	 */
 	list *head, *tail, *to_free;
 	bool is_traceback = false;
 
@@ -407,6 +455,12 @@ void postorder_main(node *root)
 
 void level_order_main(node *root)
 {
+	/* Make a stack and add the root
+	 * print the value of current node
+	 * add the left and right node if available
+	 * pop the current node
+	 * do it until stack get empty
+	 */
 	list *head, *tail, *to_free;
 	head = tail = create_list_node(root);
 
@@ -439,6 +493,12 @@ void level_order(tree *t)
 
 int32_t find_smallest_main(node *root)
 {
+	/* Make a stack and insert the root
+	 * While the logic is similar to leve-order traversal
+	 * We just some step:
+	 * compare value as we advance and stay updated with
+	 * smallest value.
+	 */
 	list *head, *tail, *to_free;
 	head = tail = create_list_node(root);
 	to_free = NULL;
@@ -475,6 +535,12 @@ int32_t find_smallest_main(node *root)
 
 int32_t find_largest_main(node *root)
 {
+	/* Make a stack and insert the root
+	 * While the logic is similar to leve-order traversal
+	 * We just some step:
+	 * compare value as we advance and stay updated with
+	 * largest value.
+	 */
 	list *head, *tail, *to_free;
 	head = tail = create_list_node(root);
 	to_free = NULL;
