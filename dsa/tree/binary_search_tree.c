@@ -1,4 +1,5 @@
 #include "binary_tree.h"
+#include "helper_function.h"
 
 node *find_parent(node *root, int32_t value)
 {
@@ -21,7 +22,7 @@ node *find_parent(node *root, int32_t value)
 	}
 }
 
-node *logic(node **root, bool have_parent, int32_t value)
+node *handle_deletion(node **root, int32_t value)
 {
 	if(!(*root))
 	{
@@ -52,11 +53,11 @@ node *logic(node **root, bool have_parent, int32_t value)
 	}
 	else
 	{
-		return logic((*root)->value < value ? &((*root)->right) : &((*root)->left), true, value);
+		return handle_deletion((*root)->value < value ? &((*root)->right) : &((*root)->left), value);
 	}
 }
 
-void delete_node(tree *t, int32_t value)
+/*void delete_node(tree *t, int32_t value)
 {
 	node *n = logic(&(t->binary_tree), false, value);
 	if(!n)
@@ -69,7 +70,7 @@ void delete_node(tree *t, int32_t value)
 		free(n);
 	}
 	return;
-}
+}*/
 
 int32_t get_height_main(node *root)
 {

@@ -4,6 +4,7 @@
 // find_smallest -> find_smallest_main
 
 #include "binary_tree.h"
+#include "helper_function.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -11,6 +12,9 @@
 
 int32_t add_child(node *n, list **tail)
 {
+	/* Utility function for adding child
+	 * in dynamic queue.
+	 */
 	if (n == NULL)
 		return 0;
 
@@ -36,6 +40,15 @@ int32_t add_child(node *n, list **tail)
 
 node *find_parent(node *root)
 {
+	/* This function finds parent for insertion
+	 * Logic:
+	 * 1. each node of tree is added to queue.
+	 * 2. The nodes will be check for following:
+	 *    i. if missing any one child then return
+	 		 that node.
+	 *   ii. else add both left and right child
+	 		 to the queue.
+	 */
 	list *head, *tail, *to_free;
 	head = tail = create_list_node(root);
 	node *parent = NULL;
@@ -65,20 +78,23 @@ node *find_parent(node *root)
 	return NULL;
 }
 
-int32_t delete_node(tree *t)
+node *handle_deletion(node **root)
 {
-	if (t->binary_tree == NULL)
-	{
-		puts("Nothing to delete.");
-		return 0;
-
-}
+	/* Node from the root of the tree will be added
+	 * to the queue (level-order wise).
+	 * following condition will be checked:
+	 * 1. if no left child for current element then
+	 	  then return preceeding element, if available			else return current element.
+	 * 2. if only left is present return current.
+	 * 3. else add subsequent childs to the queue.
+	 */
+	if (*root == NULL)
+		return NULL;
 
 	node *parent, *to_delete;
 	list *head, *tail, *to_free;
-	head = tail = create_list_node(t->binary_tree);
+	head = tail = create_list_node(*root);
 	to_free = NULL;
-	int32_t to_return;
 
 	while (head != NULL)
 	{
@@ -135,12 +151,10 @@ int32_t delete_node(tree *t)
 	else
 	{
 		to_delete = parent;
-		t->binary_tree = NULL;
+	 	*root = NULL;
 	}
 
-	to_return = to_delete->value;
-	free(to_delete);
-	return to_return;
+	return to_delete;
 }
 
 int32_t get_height_main(node *root)

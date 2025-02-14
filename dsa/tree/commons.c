@@ -1,7 +1,32 @@
 #include "binary_tree.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "helper_function.h"
 
+tree *init_tree(void)
+{
+	tree *t = (tree *)malloc(sizeof(tree));
+	if (t == NULL)
+	{
+		puts("Unable to created tree. Allocation failed.");
+		return NULL;
+	}
+	t->binary_tree = NULL;
+	t->insert_node = &insert_node;
+	t->delete_node = &delete_node;
+	t->get_height = &get_height;
+	t->get_node_level = &get_node_level;
+	t->preorder = &preorder;
+	t->inorder = &inorder;
+	t->postorder = &postorder;
+	t->level_order = &level_order;
+	t->find_smallest = &find_smallest;
+	t->find_largest = &find_largest;
+	t->search = &search;
+	t->find_path = &find_path;
+	t->destroy = &destroy;
+	return t;
+}
 
 void insert_node(tree *t, int32_t value)
 {
@@ -37,29 +62,28 @@ void insert_node(tree *t, int32_t value)
 	return;
 }
 
-tree *init_tree(void)
+#ifdef BT
+void delete_node(tree *t)
+#else
+void delete_node(tree *t, int32_t target)
+#endif
 {
-	tree *t = (tree *)malloc(sizeof(tree));
-	if (t == NULL)
+	node *to_free;
+#ifdef BT
+	to_free = handle_deletion(&(t->binary_tree));
+#else
+	to_free = handle_deletion(&(t->binary_tree), target);
+#endif
+	
+	if(to_free)
 	{
-		puts("Unable to created tree. Allocation failed.");
-		return NULL;
+		printf("Node deleted: %d\n", to_free->value);
+		free(to_free);
 	}
-	t->binary_tree = NULL;
-	t->insert_node = &insert_node;
-	t->delete_node = &delete_node;
-	t->get_height = &get_height;
-	t->get_node_level = &get_node_level;
-	t->preorder = &preorder;
-	t->inorder = &inorder;
-	t->postorder = &postorder;
-	t->level_order = &level_order;
-	t->find_smallest = &find_smallest;
-	t->find_largest = &find_largest;
-	t->search = &search;
-	t->find_path = &find_path;
-	t->destroy = &destroy;
-	return t;
+	else
+	{
+		puts("No such element.");
+	}
 }
 
 node *build_node(int32_t value)

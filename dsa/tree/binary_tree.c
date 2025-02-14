@@ -3,6 +3,7 @@
 #include <math.h>
 #include <limits.h>
 #include "binary_tree.h"
+#include "helper_function.h"
 
 node *find_parent_main(node *root, int32_t *left_size, int32_t *right_size, int32_t *height, int32_t side)
 {
@@ -159,17 +160,17 @@ node *find_parent_node(node *n, int32_t *left_size, int32_t *right_size, int32_t
 	return to_return;
 }
 
-int32_t delete_node(tree *t)
+node *handle_deletion(node **root)
 {
 	int32_t return_value = 0;
 	int32_t left_size = 0;
 	int32_t right_size = 0;
 	int32_t height = 0;
-	node *target_node = find_parent_node(t->binary_tree, &left_size, &right_size, &height, ROOT);
+	node *target_node = find_parent_node(*root, &left_size, &right_size, &height, ROOT);
 
+	node *to_free = NULL;
 	if (target_node != NULL)
 	{
-		node *to_free = NULL;
 		if (target_node->right != NULL)
 		{
 			to_free = target_node->right;
@@ -183,15 +184,11 @@ int32_t delete_node(tree *t)
 		else
 		{
 			to_free = target_node;
-			t->binary_tree = NULL;
+			*root = NULL;
 		}
-
-		return_value = to_free->value;
-
-		free(to_free);
 	}
 
-	return return_value;
+	return to_free;
 }
 
 int32_t get_height_main(node *root)

@@ -43,7 +43,7 @@ struct tree
 	node *binary_tree; // address of root node of tree
 	void (*insert_node)(tree *, int32_t);
 #ifdef BT
-	int32_t (*delete_node)(tree *);
+	void (*delete_node)(tree *);
 #else
 	void (*delete_node)(tree *, int32_t value);
 #endif
@@ -70,15 +70,10 @@ tree *init_tree(void);
 node *build_node(int32_t);
 list *create_list_node(node *);
 void clear_list(list *);
-#ifdef BT
-node *find_parent(node *);
-#else
-node *find_parent(node *, int32_t);
-#endif
 void insert_node(tree *, int32_t);
-node *find_parent_node(node *, int32_t *, int32_t *, int32_t *, int32_t);
+//node *find_parent_node(node *, int32_t *, int32_t *, int32_t *, int32_t);
 #ifdef BT
-int32_t delete_node(tree *);
+void delete_node(tree *);
 #else
 void delete_node(tree *, int32_t);
 #endif
