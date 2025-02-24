@@ -19,6 +19,8 @@ void rotate_left_right(struct node **);
 void rotate_right(struct node **);
 void rotate_right_left(struct node **);
 void flip_color(int32_t, ...);
+void rebalance(struct node **, struct node **);
+void check_balance(struct node **, struct node **);
 void insert(struct node **, int32_t, bool); 
 void insertion(struct node **, struct node **, int32_t);
 void delete_node(struct node **, int32_t);
@@ -30,15 +32,15 @@ void destroy(struct node **);
 int main(void)
 {
 	struct node *root = NULL;
-	/*insertion(&root, NULL, NULL, 10);
-	insertion(&root, NULL, NULL, 20);
-	insertion(&root, NULL, NULL, 30);
-	insertion(&root, NULL, NULL, 40);
-	insertion(&root, NULL, NULL, 50);
-	insertion(&root, NULL, NULL, 60);
-	insertion(&root, NULL, NULL, 70);
-	insertion(&root, NULL, NULL, 80);*/
-	insertion(&root, NULL, 11);
+	insertion(&root, NULL, 10);
+	insertion(&root, NULL, 20);
+	insertion(&root, NULL, 30);
+	insertion(&root, NULL, 40);
+	insertion(&root, NULL, 50);
+	insertion(&root, NULL, 60);
+	insertion(&root, NULL, 70);
+	insertion(&root, NULL, 80);
+	/*insertion(&root, NULL, 11);
 	insertion(&root, NULL, 28);
 	insertion(&root, NULL, 1);
 	insertion(&root, NULL, 2);
@@ -46,7 +48,7 @@ int main(void)
 	insertion(&root, NULL, 98);
 	insertion(&root, NULL, 3);
 	insertion(&root, NULL, 3);
-	insertion(&root, NULL, 41);
+	insertion(&root, NULL, 41);*/
 	// printf("%d %d %d %d\n", root->value, root->right->value, root->right->right->value, root->right->right->right->value);
 	preorder(root);
 	//inorder(root);
@@ -172,40 +174,10 @@ void flip_color(int32_t total, ...)
 	return;
 }
 
-void insert(struct node **position, int32_t value, bool color)
+void rebalance(struct node **current, struct node **parent)
 {
-	struct node *new = (struct node *) malloc(sizeof(struct node));
-	new->color = color;
-	new->value = value;
-	new->left = new->right = NULL;
-	*position = new;
-	return;
-}
-
-void insertion(struct node **current, struct node **parent, int32_t value)
-{
-	if(*current && (*current)->value == value)
-	{
-		return;
-	}
-	else if(*current)
-	{
-		insertion((*current)->value > value
-				  ? &((*current)->left)
-				  : &((*current)->right), current, value);
-	}
-	else
-	{
-		insert(current, value, true);
-		if(parent && (*parent)->color)
-			flip_color(1, *parent);
-		return;
-	}
-	
 	// algorithm for checking balance & balancing
 
-	if(parent != NULL)
-	{
 		int32_t left_height, right_height, left_b_height, right_b_height, l_child_diff, r_child_diff;
 		left_height = right_height = left_b_height = right_b_height = l_child_diff = r_child_diff = 0;
 
@@ -295,69 +267,62 @@ void insertion(struct node **current, struct node **parent, int32_t value)
 				rotate_left(current);
 			else
 				rotate_right_left(current);
+
+			check_balance(current, parent);
 		}
 		else
 		{		
 			return;
 		}
-	}
-	else
+	if(parent == NULL)
 	{
 		if((*current)->color)
 			flip_color(1, *current);
 	}
-	/*if(!(*current))
-	{
-		insert(current, value, parent != NULL);
-	}
-	else
-	{
-		if((*current)->value == value)
-			return;
+}
 
-		insertion((*current)->value > value ? &((*current)->left) : &((*current)->right), current, parent, value);
-	}
+void check_balance(struct node **current, struct node **parent)
+{
+	if(!*current)
+		return;
 
-	struct node *uncle = grandparent ? (*grandparent)->left == (*parent) ? (*grandparent)->right : (*grandparent)->left : NULL;
-	if(!parent || (*parent)->color == false)
+	check_balance(&((*current)->left), current);
+	check_balance(&((*current)->right), current);
+	
+	rebalance(current, parent);
+}
+
+void insert(struct node **position, int32_t value, bool color)
+{
+	struct node *new = (struct node *) malloc(sizeof(struct node));
+	new->color = color;
+	new->value = value;
+	new->left = new->right = NULL;
+	*position = new;
+	return;
+}
+
+void insertion(struct node **current, struct node **parent, int32_t value)
+{
+	if(*current && (*current)->value == value)
 	{
 		return;
 	}
-	else if(!grandparent && (*parent))
+	else if(*current)
 	{
-		if((*parent)->color == true)
-			((*parent)->color = false);
-	}
-	else if((*parent)->color && (uncle && uncle->color))
-	{
-		flip_color(3, *parent, *grandparent, (*grandparent)->left == (*parent)
-											 ? (*grandparent)->right
-											 : (*grandparent)->left);
+		insertion((*current)->value > value
+				  ? &((*current)->left)
+				  : &((*current)->right), current, value);
 	}
 	else
 	{
-		flip_color(2, *parent, *grandparent);
-		if((*grandparent)->left == *parent && (*parent)->left == *current)
-		{
-			// rotate right
-			rotate_right(grandparent);
-		}
-		else if((*grandparent)->left == *parent && (*parent)->right == *current)
-		{
-			// rotate left-right
-			rotate_left_right(grandparent);
-		}
-		else if((*grandparent)->right == *parent && (*parent)->left == *current)
-		{
-			// rotate right-left
-			rotate_right_left(grandparent);
-		}
-		else
-		{
-			// rotate left
-			rotate_left(grandparent);
-		}
-	}*/
+		insert(current, value, true);
+		if(parent && (*parent)->color)
+			flip_color(1, *parent);
+		return;
+	}
+
+	rebalance(current, parent);
 }
 
 void preorder(struct node *root)
