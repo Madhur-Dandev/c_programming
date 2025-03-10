@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 int *twoSumSorted(int *, int, int, int *);
+int remove_duplicates(int *, int);
 
 int main(void) {
 	int returnedSize;
@@ -13,6 +14,10 @@ int main(void) {
 			printf("%d\n", returnedArr[i]);
 		}
 	}
+
+	puts("");
+	int arr2[] = {0, 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4};
+	remove_duplicates(arr2, sizeof(arr2)/sizeof(int));
 	return 0;
 }
 
@@ -40,4 +45,21 @@ int* twoSumSorted(int* nums, int numsSize, int target, int* returnSize) {
 
     *returnSize = 0;
     return NULL;
+}
+
+int remove_duplicates(int *arr, int size)
+{
+	int last, current;
+	last = current = 0;
+
+	for(int i = 1; i < size; i++)
+	{
+		if(arr[last] != arr[i])
+		{
+			last++;
+			arr[last] = arr[i];
+		}
+	}
+
+	return last+1;
 }

@@ -13,7 +13,7 @@ struct node
 };
 
 struct node **find_parent(struct node **, int32_t);
-void fetch_height_and_black_height(struct node *, int32_t *, int32_t *, int32_t *); 
+void fetch_height_and_black_height(struct node *, int32_t *, int32_t *, int32_t *);
 void rotate_left(struct node **);
 void rotate_left_right(struct node **);
 void rotate_right(struct node **);
@@ -21,7 +21,7 @@ void rotate_right_left(struct node **);
 void flip_color(int32_t, ...);
 void rebalance(struct node **, struct node **);
 void check_balance(struct node **, struct node **);
-void insert(struct node **, int32_t, bool); 
+void insert(struct node **, int32_t, bool);
 void insertion(struct node **, struct node **, int32_t);
 void delete_node(struct node **, struct node **, int32_t);
 void preorder(struct node *);
@@ -64,41 +64,41 @@ int main(void)
 	delete_node(&root, NULL, 2);
 	// printf("%d %d %d %d\n", root->value, root->right->value, root->right->right->value, root->right->right->right->value);
 	preorder(root);
-	//inorder(root);
+	// inorder(root);
 	destroy(&root);
 	return 0;
 }
 
 struct node **find_parent(struct node **root, int32_t value)
 {
-        if(!root)
-        	return NULL;
-        
-        if((*root)->value < value)
-        {
-            if((*root)->right)
-            	return find_parent((&(*root)->right), value);
-            else
-			{
-                return root;
-			}
-        }
-        else
-        {
-            if((*root)->left)
-                return find_parent(&((*root)->left), value);
-            else
-			{
-                return root;
-			}
-        }
+	if (!root)
+		return NULL;
+
+	if ((*root)->value < value)
+	{
+		if ((*root)->right)
+			return find_parent((&(*root)->right), value);
+		else
+		{
+			return root;
+		}
+	}
+	else
+	{
+		if ((*root)->left)
+			return find_parent(&((*root)->left), value);
+		else
+		{
+			return root;
+		}
+	}
 }
 
 void fetch_height_and_black_height(struct node *node, int32_t *height, int32_t *black_height, int32_t *difference)
 {
-	if(!node)
+	if (!node)
 	{
-		if(black_height)
+		if (black_height)
 			(*black_height) += 1;
 		return;
 	}
@@ -106,7 +106,7 @@ void fetch_height_and_black_height(struct node *node, int32_t *height, int32_t *
 	int32_t lh_current, rh_current, lbh_current, rbh_current;
 	lh_current = rh_current = lbh_current = rbh_current = 0;
 
-	if(black_height)
+	if (black_height)
 	{
 		fetch_height_and_black_height(node->left, &lh_current, &lbh_current, NULL);
 		fetch_height_and_black_height(node->right, &rh_current, &rbh_current, NULL);
@@ -117,23 +117,24 @@ void fetch_height_and_black_height(struct node *node, int32_t *height, int32_t *
 		fetch_height_and_black_height(node->right, &rh_current, NULL, NULL);
 	}
 
-	if(black_height)
+	if (black_height)
 	{
 		*black_height = lbh_current > rbh_current
-						? lbh_current
-						: rbh_current;
+							? lbh_current
+							: rbh_current;
 	}
 
 	*height = (lh_current > rh_current
-			  ? lh_current
-			  : rh_current) + 1;
+				   ? lh_current
+				   : rh_current) +
+			  1;
 
-	if(difference)
+	if (difference)
 	{
 		*difference = lh_current - rh_current;
 	}
 
-	if(!(node->color) && black_height)
+	if (!(node->color) && black_height)
 	{
 		(*black_height) += 1;
 	}
@@ -148,11 +149,11 @@ void rotate_left(struct node **root)
 	*root = (*root)->right;
 	(*root)->left->right = NULL;
 
-	if(!temp)
+	if (!temp)
 		return;
-	
+
 	struct node **parent = find_parent(root, temp->value);
-	if(temp->value > (*parent)->value)
+	if (temp->value > (*parent)->value)
 		(*parent)->right = temp;
 	else
 		(*parent)->left = temp;
@@ -165,11 +166,11 @@ void rotate_right(struct node **root)
 	*root = (*root)->left;
 	(*root)->right->left = NULL;
 
-	if(!temp)
+	if (!temp)
 		return;
-	
+
 	struct node **parent = find_parent(root, temp->value);
-	if(temp->value > (*parent)->value)
+	if (temp->value > (*parent)->value)
 		(*parent)->right = temp;
 	else
 		(*parent)->left = temp;
@@ -193,14 +194,14 @@ void flip_color(int32_t total, ...)
 	va_list ap;
 	va_start(ap, total);
 
-	while(total)
+	while (total)
 	{
 		node = va_arg(ap, struct node *);
-		if(node)
+		if (node)
 			node->color = !(node->color);
 		total--;
 	}
-	
+
 	va_end(ap);
 	return;
 }
@@ -209,124 +210,124 @@ void rebalance(struct node **current, struct node **parent)
 {
 	// algorithm for checking balance & balancing
 
-		int32_t left_height, right_height, left_b_height, right_b_height, l_child_diff, r_child_diff;
-		left_height = right_height = left_b_height = right_b_height = l_child_diff = r_child_diff = 0;
+	int32_t left_height, right_height, left_b_height, right_b_height, l_child_diff, r_child_diff;
+	left_height = right_height = left_b_height = right_b_height = l_child_diff = r_child_diff = 0;
 
-		fetch_height_and_black_height((*current)->left, &left_height, &left_b_height, &l_child_diff);
-		fetch_height_and_black_height((*current)->right, &right_height, &right_b_height, &r_child_diff);
+	fetch_height_and_black_height((*current)->left, &left_height, &left_b_height, &l_child_diff);
+	fetch_height_and_black_height((*current)->right, &right_height, &right_b_height, &r_child_diff);
 
-		int32_t height_diff = left_height - right_height;
-		int32_t b_height_diff = left_b_height - right_b_height;
+	int32_t height_diff = left_height - right_height;
+	int32_t b_height_diff = left_b_height - right_b_height;
 
-		//printf("%d %d %d %d %d %d %d %d %d\n", (*current)->value, left_height, right_height, left_b_height, right_b_height, l_child_diff, r_child_diff, height_diff, b_height_diff);
-		if((height_diff > 1 || height_diff < -1) && (b_height_diff != 0))
+	// printf("%d %d %d %d %d %d %d %d %d\n", (*current)->value, left_height, right_height, left_b_height, right_b_height, l_child_diff, r_child_diff, height_diff, b_height_diff);
+	if ((height_diff > 1 || height_diff < -1) && (b_height_diff != 0))
+	{
+		if ((*current)->color)
 		{
-			if((*current)->color)
+			if (height_diff > 1 && l_child_diff > 0)
 			{
-				if(height_diff > 1 && l_child_diff > 0)
-				{
-					rotate_right(current);
-				}
-				else if(height_diff < -1 && r_child_diff < 0)
-				{
-					rotate_left(current);
-				}
-				else if(height_diff > 1 && l_child_diff < 0)
-				{
-					flip_color(1, *current);
-					rotate_left_right(current);
-				}
-				else
-				{
-					flip_color(1, *current);
-					rotate_right_left(current);
-				}
-			}
-			else
-			{
-				if(height_diff > 1 && l_child_diff > 0)
-				{
-					flip_color(1, *current);
-					rotate_right(current);
-				}
-				else if(height_diff < -1 && r_child_diff < 0)
-				{
-					flip_color(1, *current);
-					rotate_left(current);
-				}
-				else if(height_diff > 1 && l_child_diff < 0)
-				{
-					rotate_left_right(current);
-				}
-				else
-				{
-					rotate_right_left(current);
-				}
-			}
-		}
-		else if((height_diff <= 1 && height_diff >= -1) && b_height_diff != 0)
-		{
-			if(b_height_diff < 0)
-			{
-				if((*current)->left && (*current)->left->color)
-					flip_color(1, (*current)->left);
-				else
-					flip_color(1, (*current)->right);
-			}
-			
-			if(b_height_diff > 0)
-			{
-				if((*current)->right && (*current)->right->color)
-					flip_color(1, (*current)->right);
-				else
-					flip_color(1, (*current)->left);
-			}
-
-			if((*current)->color)
-			{
-				if((*current)->left->color || (*current)->right->color)
-					flip_color(1, *current);
-			}
-		}
-		else if((height_diff > 1 && height_diff < -1) && b_height_diff == 0)
-
-		{
-			if(height_diff > 1 && l_child_diff > 0)
 				rotate_right(current);
-			else if(height_diff > 1 && l_child_diff < 0)
-				rotate_left_right(current);
-			else if(height_diff < -1 && r_child_diff < 0)
+			}
+			else if (height_diff < -1 && r_child_diff < 0)
+			{
 				rotate_left(current);
+			}
+			else if (height_diff > 1 && l_child_diff < 0)
+			{
+				flip_color(1, *current);
+				rotate_left_right(current);
+			}
 			else
+			{
+				flip_color(1, *current);
 				rotate_right_left(current);
-
-			check_balance(current, parent);
+			}
 		}
 		else
-		{		
-			return;
+		{
+			if (height_diff > 1 && l_child_diff > 0)
+			{
+				flip_color(1, *current);
+				rotate_right(current);
+			}
+			else if (height_diff < -1 && r_child_diff < 0)
+			{
+				flip_color(1, *current);
+				rotate_left(current);
+			}
+			else if (height_diff > 1 && l_child_diff < 0)
+			{
+				rotate_left_right(current);
+			}
+			else
+			{
+				rotate_right_left(current);
+			}
 		}
-	if(parent == NULL)
+	}
+	else if ((height_diff <= 1 && height_diff >= -1) && b_height_diff != 0)
 	{
-		if((*current)->color)
+		if (b_height_diff < 0)
+		{
+			if ((*current)->left && (*current)->left->color)
+				flip_color(1, (*current)->left);
+			else
+				flip_color(1, (*current)->right);
+		}
+
+		if (b_height_diff > 0)
+		{
+			if ((*current)->right && (*current)->right->color)
+				flip_color(1, (*current)->right);
+			else
+				flip_color(1, (*current)->left);
+		}
+
+		if ((*current)->color)
+		{
+			if ((*current)->left->color || (*current)->right->color)
+				flip_color(1, *current);
+		}
+	}
+	else if ((height_diff > 1 && height_diff < -1) && b_height_diff == 0)
+
+	{
+		if (height_diff > 1 && l_child_diff > 0)
+			rotate_right(current);
+		else if (height_diff > 1 && l_child_diff < 0)
+			rotate_left_right(current);
+		else if (height_diff < -1 && r_child_diff < 0)
+			rotate_left(current);
+		else
+			rotate_right_left(current);
+
+		check_balance(current, parent);
+	}
+	else
+	{
+		return;
+	}
+	if (parent == NULL)
+	{
+		if ((*current)->color)
 			flip_color(1, *current);
 	}
 }
 
 void check_balance(struct node **current, struct node **parent)
 {
-	if(!(*current))
+	if (!(*current))
 		return;
 
 	check_balance(&((*current)->left), current);
 	check_balance(&((*current)->right), current);
-	
+
 	rebalance(current, parent);
 }
 
 void insert(struct node **position, int32_t value, bool color)
 {
-	struct node *new = (struct node *) malloc(sizeof(struct node));
+	struct node *new = (struct node *)malloc(sizeof(struct node));
 	new->color = color;
 	new->value = value;
 	new->left = new->right = NULL;
@@ -336,20 +337,21 @@ void insert(struct node **position, int32_t value, bool color)
 
 void insertion(struct node **current, struct node **parent, int32_t value)
 {
-	if(*current && (*current)->value == value)
+	if (*current && (*current)->value == value)
 	{
 		return;
 	}
-	else if(*current)
+	else if (*current)
 	{
 		insertion((*current)->value > value
-				  ? &((*current)->left)
-				  : &((*current)->right), current, value);
+					  ? &((*current)->left)
+					  : &((*current)->right),
+				  current, value);
 	}
 	else
 	{
 		insert(current, value, true);
-		if(parent && (*parent)->color)
+		if (parent && (*parent)->color)
 			flip_color(1, *parent);
 		return;
 	}
@@ -359,10 +361,10 @@ void insertion(struct node **current, struct node **parent, int32_t value)
 
 void delete_node(struct node **current, struct node **parent, int32_t target)
 {
-	if(!(*current))
+	if (!(*current))
 		return;
-	
-	if(*current && (*current)->value != target)
+
+	if (*current && (*current)->value != target)
 	{
 		delete_node((*current)->value > target ? &((*current)->left) : &((*current)->right), current, target);
 		rebalance(current, parent);
@@ -370,20 +372,20 @@ void delete_node(struct node **current, struct node **parent, int32_t target)
 	else
 	{
 		struct node *to_free = *current;
-		if(!((*current)->left) && !((*current)->right))
+		if (!((*current)->left) && !((*current)->right))
 		{
 			*current = NULL;
 		}
-		else if((*current)->left && (*current)->right)
+		else if ((*current)->left && (*current)->right)
 		{
 			int32_t left_height, right_height;
 			left_height = right_height = 0;
 			fhbh((*current)->left, &left_height, NULL, NULL);
 			fhbh((*current)->right, &right_height, NULL, NULL);
 
-			//printf("%d %d\n", left_height, right_height);
+			// printf("%d %d\n", left_height, right_height);
 			struct node **new_node_addr;
-			if(left_height < right_height)
+			if (left_height < right_height)
 			{
 				new_node_addr = find_parent(&((*current)->right), (*current)->value);
 			}
@@ -397,7 +399,7 @@ void delete_node(struct node **current, struct node **parent, int32_t target)
 
 			new_node->left = (*current)->left;
 			new_node->right = (*current)->right;
-			//new_node->color = (*current)->color;
+			// new_node->color = (*current)->color;
 
 			*current = new_node;
 		}
@@ -405,40 +407,40 @@ void delete_node(struct node **current, struct node **parent, int32_t target)
 		{
 			*current = (*current)->left ? (*current)->left : (*current)->right;
 		}
-		
+
 		free(to_free);
-		//puts("delete");
+		// puts("delete");
 		check_balance(current, parent);
 	}
 }
 
 void preorder(struct node *root)
 {
-	if(!root)
+	if (!root)
 		return;
 
 	printf("%d %d\n", root->value, root->color);
 	preorder(root->left);
 	preorder(root->right);
-	
+
 	return;
 }
 
 void inorder(struct node *root)
 {
-	if(!root)
+	if (!root)
 		return;
 
 	inorder(root->left);
 	printf("%d %d\n", root->value, root->color);
 	inorder(root->right);
-	
+
 	return;
 }
 
 void postorder(struct node *root)
 {
-	if(!root)
+	if (!root)
 		return;
 
 	inorder(root->left);
@@ -450,7 +452,7 @@ void postorder(struct node *root)
 
 void destroy(struct node **root)
 {
-	if(!(*root))
+	if (!(*root))
 		return;
 
 	destroy(&((*root)->left));

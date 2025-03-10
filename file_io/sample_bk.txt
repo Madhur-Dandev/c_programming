@@ -1,0 +1,2 @@
+I sample text file for reading.
+Writing program in c is awesome.
