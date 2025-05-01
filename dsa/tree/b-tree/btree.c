@@ -31,6 +31,7 @@ Key *add_adjt(Node *, char *, ...);
 void insert_main(Node *, Key **, int);
 void insert(Node **, int);
 void inorder(Node *);
+void delete_tree(Node *);
 
 int main(void)
 {
@@ -40,9 +41,15 @@ int main(void)
 	insert(&root, 2);
 	insert(&root, 3);
 	insert(&root, 4);
-	/*insert(&root, 5);
-	insert(&root, 6);*/
-
+	insert(&root, 5);
+	insert(&root, 6);
+	insert(&root, 7);
+	insert(&root, 8);
+	insert(&root, 9);
+	//printf("%p %p %p %p %p %p %p %p\n", root->arr[0]->left, root->arr[0]->left->arr[0]->left, root->arr[0]->left->arr[0]->right, root->arr[0]->right, root->arr[0]->right->arr[0]->left, root->arr[0]->right->arr[0]->right, root->arr[0]->right->arr[1]->left, root->arr[0]->right->arr[1]->right);
+	//printf("%d %d %d\n", root->size, root->arr[0]->left->size, root->arr[0]->right->size);
+	inorder(root);
+	delete_tree(root);
 	return 0;
 }
 
@@ -50,8 +57,10 @@ void add_new(Node *node, Key *to_add, Key **ovrflw, int pos)
 {
 	Key *temp = to_add;
 	Key *extra;
-	for(int i = pos; i < node->size; i++)
+	for(int i = pos; i <= node->size; i++)
 	{
+		if(i == DEG - 1)
+			break;
 		extra = node->arr[i];
 		node->arr[i] = temp;
 		temp = extra;
@@ -76,24 +85,10 @@ Node *make_node(int count, Key *arr[])
 		return NULL;
 	}
 
-	//printf("%d\n", new->size);
 	Key *new_key;
 	for(int i = 0; i < count; i++)
 	{
 		new->arr[i] = arr[i];
-		/*new_key = (Key *) calloc(1, sizeof(Key));
-		if(new_key == NULL)
-		{
-			perror("Insertion falied");
-			for(int j = 0; j < i; i++)
-			{
-				free(new->arr[j]);
-			}
-			free(new);
-			return NULL;
-		}
-		new_key->value = arr[i];
-		new->arr[i] = new_key;*/
 	}
 	new->size = count;
 	return new;
@@ -119,6 +114,7 @@ Key *add_adjt(Node *node, char *type, ...)
 		new->value = va_arg(arg, int);
 	}
 	va_end(arg);
+	
 	// finding place in current array of keys
 	int idx = 0;
 	for(; idx < node->size; idx++)
@@ -155,13 +151,6 @@ Key *add_adjt(Node *node, char *type, ...)
 			if(idx + 1 < DEG - 1)
 				node->arr[idx + 1]->left = new->right;
 
-			/*for(int i = idx; i < node->size; i++)
-			{
-				extra = node->arr[i];
-				node->arr[i] = temp;
-				//node->arr[i + 1]->left = new->arr[i]->right;
-				temp = extra;
-			}*/
 			add_new(node, new, &extra, idx);
 		}
 
@@ -193,22 +182,6 @@ Key *add_adjt(Node *node, char *type, ...)
 	}
 	else
 	{
-		// fix this
-		/*Key *temp = node->arr[idx];
-		Key *next;
-		node->arr[idx] = new;
-		if(idx - 1 != 0)
-			node->arr[idx - 1]->right = new->left;
-		if(idx + 1 != DEG - 1)
-			node->arr[idx + 1]->left = new->right;
-
-		for(int i = idx; i < node->size - 1; i++)
-		{
-			next = node->arr[i + 1];
-			node->arr[i + 1] = temp;
-			node->arr[i + 1]->left = node->arr[i]->right;
-			temp = extra;
-		}*/
 		add_new(node, new, NULL, idx);
 		return NULL;
 	}
@@ -216,31 +189,16 @@ Key *add_adjt(Node *node, char *type, ...)
 
 void insert_main(Node *root, Key **ret_val,  int value)
 {
-	/*if(root == NULL)
-	{
-		//Node *new = make_node(1, value);
-		return;
-	}*/
-
 	int idx = 0;
-	while(idx < root->size)
-	{	
-		if(value > root->arr[idx]->value)
-		{
-			if(idx == root->size - 1)
-				break;
-			else
-				idx++;
-			continue;
-		}
-		break;
-	}
+	for(; idx < root->size; idx++)
+		if(root->arr[idx]->value > value)
+			break;
 
 	Key *key = NULL;
-	if(root->arr[idx]->value > value && root->arr[idx]->left != NULL)
+	if((idx == DEG - 1 || idx == root->size) && root->arr[idx - 1]->right != NULL)
+		insert_main(root->arr[idx - 1]->right, &key, value);
+	else if(idx < DEG - 1 && idx < root->size  && root->arr[idx]->left != NULL)
 		insert_main(root->arr[idx]->left, &key, value);
-	else if(root->arr[idx]->value < value && root->arr[idx]->right != NULL)
-		insert_main(root->arr[idx]->right, &key, value);
 	else
 	{
 		*ret_val = add_adjt(root, "i", value);
@@ -254,66 +212,6 @@ void insert_main(Node *root, Key **ret_val,  int value)
 			*ret_val = key;
 	}
 	return;
-
-	/*Key *new = (Key *) calloc(1, sizeof(Key));
-	if(new == NULL)
-	{
-		perror("Insertion Failed");
-		return;
-	}
-	new->value = value;
-
-	// finding place in current array of keys
-	int idx = 0;
-	for(; idx < root->size; idx++)
-	{
-		if(root->arr[idx]->value < value)
-			continue;
-		else if(root->arr[idx]->value > value)
-			break;
-		else
-			return;
-	}
-
-	Node *child_ret_val = NULL;
-	if(value > root->arr[size-1])
-		return;
-
-	// determining whether to put in array or break the
-	// array in parent-child relationship
-	if((root->size + 1) >= DEG)
-	{
-		// array overflow
-		// finding parent and overflowed key
-		Key *extra;
-		Key *parent;
-		int median = (DEG - 1) / 2;
-		if(idx >= (DEG - 1))
-		{f
-			extra = new;
-		}
-		else
-		{
-			// shift digit to right
-			Key *temp = root->arr[idx];
-			root->arr[idx] = new;
-			for(int i = idx; i < root->size - 1; i++)
-			{
-				extra = root->arr[i + 1];
-				root->arr[i + 1] = temp;
-				temp = extra;
-			}
-		}	
-		parent = root->arr[median];
-		for(int i = median; i < size; i++)
-		{
-			
-		}
-		root->arr[size-1] = extra;
-	}
-	else
-	{}
-	return;*/
 }
 
 void insert(Node **root, int value)
@@ -339,15 +237,29 @@ void insert(Node **root, int value)
 
 void inorder(Node *root)
 {
-	if(root->size == 0)
+	if(root == NULL)
 		return;
 
 	for(int i = 0; i < root->size; i++)
 	{
 		inorder(root->arr[i]->left);
 		printf("%d\n", root->arr[i]->value);
+	}
+	inorder(root->arr[root->size - 1]->right);
+}
 
-		if(i + 1 >= root->size)
-			inorder(root->arr[i]->right);
+void delete_tree(Node *root)
+{	
+	if(root == NULL)
+		return;
+
+	for(int i = 0; i < root->size; i++)
+	{
+		delete_tree(root->arr[i]->left);
+		
+		if(i == root->size - 1)
+			delete_tree(root->arr[i]->right);
+
+		free(root->arr[i]);
 	}
 }
