@@ -1,4 +1,11 @@
 /* This B-Tree algorithm do not permit duplicates
+ * Potential issues:
+ * 1. High memory useage
+ * 2. More complex for mananging pointers to the left and right sub-node
+ * -------
+ * Usage:
+ * 1. Best used in expression tree like decision tree, or syntax/ expression
+ * tree
  */
 
 // Change the linear search to binary search for faster operation.
@@ -10,12 +17,11 @@
 #include <stdbool.h>
 
 #define DEG 4
-#define ARR_RGHT_SFT
 
 struct node
 {
 	int size;
-	struct key_node *arr[DEG];
+	struct key_node *arr[DEG - 1];
 };
 
 struct key_node
