@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define VRTCS 4
 
@@ -16,29 +17,25 @@ void freeup(Node **);
 
 int main(void)
 {
-	Node **arr = init();
-	add_connection(arr, 1, 2);
-	delete_connection(arr, 1, 2);
-	freeup(arr);
+	Node **list = init();
+	add_connection(list, 1, 2);
+	delete_connection(list, 1, 2);
+	freeup(list);
 	return 0;
 }
 
 Node **init()
 {
-	Node **arr = (Node **) malloc(sizeof(Node *) * VRTCS);
-	Node *new = NULL;
-	for(int i = 0; i < VRTCS; i++)
+	Node **list = (Node **) malloc(sizeof(Node *) * VRTCS);
+	if(list == NULL)
 	{
-		puts("here");
-		new = (Node *) malloc(sizeof(Node));
-		new->value = i + 1;
-		new->next = NULL;
-		arr[i] = new;
+		perror("Failed to add the edge");
+		return NULL;
 	}
-	return arr;
+	return list;
 }
 
-void add_connection(Node **arr, int vrtx, int lk_vrtx)
+void add_connection(Node **list, int vrtx, int lk_vrtx)
 {
 	// vrtx -> vertex
 	// lk_vrtx-> link vertex
@@ -48,19 +45,19 @@ void add_connection(Node **arr, int vrtx, int lk_vrtx)
 		fprintf(stderr, "Error: No such vertex");
 		return;
 	}
-
-	Node *head = arr[vrtx - 1];
-	while(head->next != NULL)
-		head = head->next;
 	
 	Node *new = (Node *) malloc(sizeof(Node));
+	if(new == NULL)
+	{
+		perror("Failed to add the edge");
+		return;
+	}
 	new->value = lk_vrtx;
-	new->next = NULL;
-	
-	head->next = new;
+	new->next = list[vrtx];
+	list[vrtx]	= new;
 }
 
-void delete_connection(Node **arr, int vrtx, int lk_vrtx)
+void delete_connection(Node **list, int vrtx, int lk_vrtx)
 {
 	// vrtx -> vertex
 	// lk_vrtx-> link vertex
@@ -71,35 +68,48 @@ void delete_connection(Node **arr, int vrtx, int lk_vrtx)
 		return;
 	}
 
-	Node *curr = arr[vrtx - 1]->next;
-	Node *prev = arr[vrtx-1];
+	if(list[vrtx] == NULL)
+	{
+		fprintf(stderr, "No edge from %d to %d\n", vrtx, lk_vrtx);
+	}
+
+	Node *curr = list[vrtx - 1];
+	Node *prev = NULL;
 	while(curr != NULL)
 	{
 		if(curr->value == lk_vrtx)
 		{
-			curr->next = curr->next;
+			if(prev == NULL)
+				list[vrtx] = curr->next;
+			else
+				prev->next = curr->next;
+
 			break;
 		}
-		free(curr);
+		prev = curr;
+		curr = curr->next;
 	}
+	prev = curr;
+	free(curr);
 }
-void freeup(Node *arr[])
+void freeup(Node **list)
 {
-	Node *head, *to_free;
+	Node *curr, *to_free;
 
 	for(int i = 0; i < VRTCS; i++)
 	{
-		head = arr[i];
-			
-		while(head->next != NULL)
+		if(list[i] != NULL)
 		{
-			to_free = head;
-			head = head->next;
-			free(to_free);
+			curr = list[i]->next;
+			while(curr != NULL)
+			{
+				to_free = curr;
+				curr = curr->next;
+				free(to_free);
+			}
 		}
-
-		free(head);
 	}
 
-	free(arr);
+	free(list);
+	return;
 }
