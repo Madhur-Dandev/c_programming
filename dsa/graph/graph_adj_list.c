@@ -1,50 +1,73 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define VRTCS 4
+#define CHECK_PARAM(a, b) \
+if(a >= VRTCS || b >= VRTCS) \
+{ \
+	fprintf(stderr, "Invalid vertex\n"); \
+	return; \
+}
 
 typedef struct adj_list_node
 {
 	int value;
+	int weight;
 	struct adj_list_node *next;
 } Node;
 
-Node **init(void);
-void add_connection(Node **, int, int);
-void delete_connection(Node **, int, int);
-void freeup(Node **);
+typedef struct graph_detail
+{
+	Node *list[VRTCS];
+	bool is_weighted;
+} Graph;
+
+Graph *init(bool);
+void add_connection(Graph *, int, int, int);
+void delete_connection(Graph *, int, int);
+void print(Graph *, bool);
+void freeup(Graph *);
 
 int main(void)
 {
-	Node **list = init();
-	add_connection(list, 1, 2);
-	delete_connection(list, 1, 2);
-	freeup(list);
+	Graph *graph = init(true);
+	add_connection(graph, 1, 2, 1);
+	add_connection(graph, 2, 1, 1);
+	add_connection(graph, 1, 0, 1);
+	add_connection(graph, 0, 1, 1);
+	print(graph, true);
+	delete_connection(graph, 1, 2);
+	print(graph, false);
+	freeup(graph);
+	graph = NULL;
 	return 0;
 }
 
-Node **init()
+Graph *init(bool wgh)
 {
-	Node **list = (Node **) malloc(sizeof(Node *) * VRTCS);
-	if(list == NULL)
+	// wgh -> weighted
+	Graph *grph = (Graph *) malloc(sizeof(Graph));
+	if(grph == NULL)
 	{
 		perror("Failed to add the edge");
 		return NULL;
 	}
-	return list;
+	memset(grph, 0, sizeof(Graph));
+	grph->is_weighted = wgh;
+	return grph;
 }
 
-void add_connection(Node **list, int vrtx, int lk_vrtx)
+void add_connection(Graph *grph, int vrtx, int lk_vrtx, int wgh)
 {
 	// vrtx -> vertex
 	// lk_vrtx-> link vertex
-
-	if(vrtx >= VRTCS)
-	{
-		fprintf(stderr, "Error: No such vertex");
+	
+	if(grph == NULL)
 		return;
-	}
+
+	CHECK_PARAM(vrtx, lk_vrtx);
 	
 	Node *new = (Node *) malloc(sizeof(Node));
 	if(new == NULL)
@@ -53,34 +76,36 @@ void add_connection(Node **list, int vrtx, int lk_vrtx)
 		return;
 	}
 	new->value = lk_vrtx;
-	new->next = list[vrtx];
-	list[vrtx]	= new;
+	new->weight = grph->is_weighted ? wgh : 1;
+	new->next = grph->list[vrtx];
+	grph->list[vrtx] = new;
+	printf("Edge added from %d from %d\n", vrtx, lk_vrtx);
+	return;
 }
 
-void delete_connection(Node **list, int vrtx, int lk_vrtx)
+void delete_connection(Graph *grph, int vrtx, int lk_vrtx)
 {
 	// vrtx -> vertex
 	// lk_vrtx-> link vertex
 
-	if(vrtx >= VRTCS)
-	{
-		fprintf(stderr, "Error: No such vertex");
+	if(grph == NULL)
 		return;
-	}
+	
+	CHECK_PARAM(vrtx, lk_vrtx);
 
-	if(list[vrtx] == NULL)
+	if(grph->list[vrtx] == NULL)
 	{
-		fprintf(stderr, "No edge from %d to %d\n", vrtx, lk_vrtx);
+		fprintf(stderr, "Error: No edge from %d to %d\n", vrtx, lk_vrtx);
 	}
 
-	Node *curr = list[vrtx - 1];
+	Node *curr = grph->list[vrtx];
 	Node *prev = NULL;
 	while(curr != NULL)
 	{
 		if(curr->value == lk_vrtx)
 		{
 			if(prev == NULL)
-				list[vrtx] = curr->next;
+				grph->list[vrtx] = curr->next;
 			else
 				prev->next = curr->next;
 
@@ -91,16 +116,49 @@ void delete_connection(Node **list, int vrtx, int lk_vrtx)
 	}
 	prev = curr;
 	free(curr);
+
+	puts("Edge deleted");
 }
-void freeup(Node **list)
+
+void print(Graph *grph, bool directed)
+{
+	for(int i = 0; i < VRTCS; i++)
+	{
+		printf("Vertex %d:", i);
+		if(grph->list[i] == NULL)
+			printf(" No edge");
+		else
+		{
+			Node *curr = grph->list[i];
+			while(curr != NULL)
+			{
+				if(directed)
+					printf(" ->");
+
+				if(grph->is_weighted)
+					printf(" (%d, %d)", curr->value, curr->weight);
+				else
+					printf(" %d", curr->value);
+
+				curr = curr->next;
+				if(curr != NULL)
+					printf(",");
+			}
+		}
+		puts("");
+	}
+	return;
+}
+
+void freeup(Graph *grph)
 {
 	Node *curr, *to_free;
 
 	for(int i = 0; i < VRTCS; i++)
 	{
-		if(list[i] != NULL)
+		if(grph->list[i] != NULL)
 		{
-			curr = list[i]->next;
+			curr = grph->list[i];
 			while(curr != NULL)
 			{
 				to_free = curr;
@@ -110,6 +168,7 @@ void freeup(Node **list)
 		}
 	}
 
-	free(list);
+	free(grph);
+	puts("Graph deleted");
 	return;
 }
