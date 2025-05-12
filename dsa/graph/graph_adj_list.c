@@ -1,15 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#define VRTCS 4
-#define CHECK_PARAM(a, b) \
-if(a >= VRTCS || b >= VRTCS) \
-{ \
-	fprintf(stderr, "Invalid vertex\n"); \
-	return; \
-}
+#include "graph.h"
 
 typedef struct adj_list_node
 {
@@ -45,9 +34,8 @@ int main(void)
 	return 0;
 }
 
-Graph *init(bool wgh)
+Graph *init(bool is_weighted)
 {
-	// wgh -> weighted
 	Graph *grph = (Graph *) malloc(sizeof(Graph));
 	if(grph == NULL)
 	{
@@ -55,7 +43,7 @@ Graph *init(bool wgh)
 		return NULL;
 	}
 	memset(grph, 0, sizeof(Graph));
-	grph->is_weighted = wgh;
+	grph->is_weighted = is_weighted;
 	return grph;
 }
 
@@ -63,6 +51,7 @@ void add_connection(Graph *grph, int vrtx, int lk_vrtx, int wgh)
 {
 	// vrtx -> vertex
 	// lk_vrtx-> link vertex
+	// wgh -> weight
 	
 	if(grph == NULL)
 		return;
