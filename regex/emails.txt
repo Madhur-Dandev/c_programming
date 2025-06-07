@@ -1,0 +1,18 @@
+simple@example.com
+very.common@example.com
+firstname.lastname@example.org
+user123@example.net
+x@example.com
+disposable.style.email.with+symbol@example.com (using the "+" for filtering)
+other.email-with-dash@example.com (hyphens are allowed)
+"much.more unusual"@example.com (quoted local part)
+"very.unusual.@.unusual.com"@example.com (more complex quoting)
+#!$%&'*+-/=?^_{|}~@example.org` (using many allowed special characters)
+user%example.com@example.org (% escaped mail route)
+user-@example.org (local-part ending with a non-alphanumeric)
+postmaster@[123.123.123.123] (IP address domain, though discouraged)
+postmaster@[IPv6:2001:db8::1]
+info@companydomain.com
+support@companydomain.com
+sales.department@companydomain.net
+jane.doe@companydomain.co.uk
