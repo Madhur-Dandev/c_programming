@@ -29,8 +29,9 @@ if(var == NULL) \
 } while(0);
 
 void insert(Node **, int);
+void delete(Node **, int);
 int check_balance(Node *, Node *);
-void preorder(Node *);
+void inorder(Node *);
 
 int main(void)
 {
@@ -54,8 +55,9 @@ int main(void)
 	insert(&root, 86);
 	insert(&root, 911);
 	insert(&root, 20010);
+	delete(&root, 911);
 	//insert(&root, 0);
-	preorder(root);
+	inorder(root);
 	return 0;
 }
 
@@ -203,12 +205,198 @@ void insert(Node **root, int value)
 	printf("%d ended\n\n", value);
 }
 
+void left_shift(Node *node, int prnt_no)
+{
+	Node *lft_chd = node->children[prnt_no];
+	Node *rht_chd = node->children[prnt_no + 1];
+
+	int extra = node->values[prnt_no], temp;
+	for(int i = 0; i < rht_chd->value_size; i++)
+	{
+		temp = rht_chd->values[i];
+		rht_chd->values[i] = extra;
+		extra = temp;
+	}
+		
+	rht_chd->values[rht_chd->value_size++] = extra;
+
+	Node *xtr_chd = lft_chd->children[--(lft_chd->children_size)], tmp_chd;
+	for(int i = 0; i < rht_chd->children_size; i++)
+	{
+		tmp_chd = rht_chd->children[i];
+		rht_chd->children[i] = xtr_chd;
+		xtr_chd = tmp_chd;
+	}
+
+	rht_chd->children[rht_chd->children_size++] = xtr_chd;
+
+	node->values[prnt_no] = lft_chd->values[--(lft_chd->value_size)];
+	
+	return;
+}
+
+void right_shift(Node *node)
+{
+	Node *lft_chd = node->children[prnt_no];
+	Node *rht_chd = node->children[prnt_no + 1];
+
+	int extra = node->values[prnt_no], temp;
+	for(int i = 0; i < rht_chd->value_size; i++)
+	{
+		temp = rht_chd->values[i];
+		rht_chd->values[i] = extra;
+		extra = temp;
+	}
+		
+	rht_chd->values[rht_chd->value_size++] = extra;
+
+	Node *xtr_chd = lft_chd->children[--(lft_chd->children_size)], tmp_chd;
+	for(int i = 0; i < rht_chd->children_size; i++)
+	{
+		tmp_chd = rht_chd->children[i];
+		rht_chd->children[i] = xtr_chd;
+		xtr_chd = tmp_chd;
+	}
+
+	rht_chd->children[rht_chd->children_size++] = xtr_chd;
+
+	node->values[prnt_no] = lft_chd->values[--(lft_chd->value_size)];
+	
+	return;
+}
+
+bool delete_main(Node **node, int *ret_val, bool to_ret, int value)
+{
+	if(*node == NULL)
+		return false;
+	
+	bool adjust = false;
+
+	int j;
+	if(to_ret)
+	{
+		if((*node)->children_size > 0)
+		{
+			adjust = delete_main(&((*node)->children[(*node)->children_size - 1]), ret_val, to_ret, 0);
+			j = (*root)->value_size - 1;
+		}
+		else
+		{
+			*ret_val = (*node)->values[--((*node)->value_size)];
+			//*ret_val = (*node)->values[(*node)->value_size - 1];
+			return (*node)->value_size < ceil((double) (DEG - 2) / (double) 2) ? true : false; 
+		}
+	}
+	else
+	{
+		int i = 0, j = (*node)->value_size - 1;
+		bool found = false;
+		while(i <= j)
+		{
+			int med = (i + j) / 2;
+			if((*node)->values[med] > value)
+				j = med - 1;
+			else if((*node)->values[med] < value)
+				i = med + 1;
+			else
+			{
+				found = true;
+				break;
+			}
+		}
+
+		if(found)
+		{
+			if((*node)->children_size > 0)
+			{
+				int new_val;
+				adjust = delete_main(&((*node)->children[j - 1 >= 0 ? j - 1 : 0]), &new_val, true, 0);
+				(*node)->values[j] = new_val;
+				printf("Got left value %d\n", new_val);
+			}
+			else
+			{
+				--((*node)->value_size);
+				for(int x = j; x < (*node)->value_size; x++)
+					(*node)->values[x] = (*node)->values[x + 1];
+				puts("Got the node with 0 child");
+			}
+		}
+		else
+		{
+			if(j < 0)
+				j = 0;
+			adjust = delete_main(&((*node)->children[(*node)->values[j] < value? j + 1 : j]), ret_val, to_ret, value);
+		}
+	}
+
+	if(adjust)
+	{
+		puts("adjust");
+		int min = ceil((double) (DEG - 2) / (double) 2);
+
+		bool merge = false;
+		if((*node)->children[j]->value_size < min)
+		{
+			if(j > 0 && (*node)->children[j - 1]->value_size > min)
+				right_shift(*node, j - 1);
+			else if((*node)->children[j + 1]->value_size > min)
+				left_shift(*node, j);
+			else
+				merge = true;
+		}
+		else
+		{
+			if((*node)->children[j + 1]->value_size > min)
+				left_shift(*node, j);
+			else
+				merge = true;
+		}
+
+		if(merge)
+		{
+			Node *lft_chd = (*node)->children[j];
+			Node *rht_chd = (*node)->children[j + 1];
+			Node *prnt = *node;
+			lft_chd->values[lft_chd->value_size++] = prnt->values[j];
+			(*node)->value_size--;
+
+			for(int x = j; x = (*node)->value_size; x++)
+				prnt->values[x] = prnt->values[x + 1];
+
+			for(int x = 0; x < rht_chd->value_size; x++)
+				lft_chd->values[lft_chd->value_size++] = rht_chd->values[x];
+
+			for(int x = 0; x < rht_chd->children_size; x++)
+				lft_chd->children[lft_chd->children_size++] = rht_chd->children[x];
+
+			free((*node)->children[j + 1]);
+			(*node)->children_size--;
+			
+			for(int x = j + 1; x < prnt->children_size; x++)
+				prnt->children[x] = prnt->children[x + 1];
+		}
+
+		adjust = (*node)->value_size < min ? true : false;
+	}
+
+	return adjust;
+}
+
+void delete(Node **root, int value)
+{
+	puts("Deletion in progess");
+	printf("%d\n", delete_main(root, NULL, false, value));
+	puts("Deletion ended");
+	return;
+}
+
 int check_balance(Node *node, Node *new_node)
 {
 	return 0;
 }
 
-void preorder(Node *root)
+void inorder(Node *root)
 {
 	if(root == NULL)
 		return;
@@ -218,11 +406,11 @@ void preorder(Node *root)
 	for(; i < root->value_size; i++)
 	{
 		if(root->children_size > 0)		
-			preorder(root->children[i]);
+			inorder(root->children[i]);
 		printf("%d\n", root->values[i]);
 	}
 
 	if(root->children_size > 0)
-		preorder(root->children[i]);
+		inorder(root->children[i]);
 	return;
 }
