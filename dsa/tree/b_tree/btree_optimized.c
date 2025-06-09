@@ -55,7 +55,8 @@ int main(void)
 	insert(&root, 86);
 	insert(&root, 911);
 	insert(&root, 20010);
-	delete(&root, 911);
+	inorder(root);
+	delete(&root, 1);
 	//insert(&root, 0);
 	inorder(root);
 	return 0;
@@ -210,32 +211,20 @@ void left_shift(Node *node, int prnt_no)
 	Node *lft_chd = node->children[prnt_no];
 	Node *rht_chd = node->children[prnt_no + 1];
 
-	int extra = node->values[prnt_no], temp;
+	lft_chd->values[lft_chd->value_size++] = node->values[prnt_no];
+	node->values[prnt_no] = rht_chd->values[0];
+	rht_chd->children_size--;
 	for(int i = 0; i < rht_chd->value_size; i++)
-	{
-		temp = rht_chd->values[i];
-		rht_chd->values[i] = extra;
-		extra = temp;
-	}
-		
-	rht_chd->values[rht_chd->value_size++] = extra;
+		rht_chd->values[i] = rht_chd->values[i + 1];
 
-	Node *xtr_chd = lft_chd->children[--(lft_chd->children_size)], tmp_chd;
+	lft_chd->children[lft_chd->children_size++] = rht_chd->children[0];
+	rht_chd->children_size--;
 	for(int i = 0; i < rht_chd->children_size; i++)
-	{
-		tmp_chd = rht_chd->children[i];
-		rht_chd->children[i] = xtr_chd;
-		xtr_chd = tmp_chd;
-	}
-
-	rht_chd->children[rht_chd->children_size++] = xtr_chd;
-
-	node->values[prnt_no] = lft_chd->values[--(lft_chd->value_size)];
-	
+		rht_chd->children[i] = rht_chd->children[i + 1];
 	return;
 }
 
-void right_shift(Node *node)
+void right_shift(Node *node, int prnt_no)
 {
 	Node *lft_chd = node->children[prnt_no];
 	Node *rht_chd = node->children[prnt_no + 1];
@@ -250,7 +239,7 @@ void right_shift(Node *node)
 		
 	rht_chd->values[rht_chd->value_size++] = extra;
 
-	Node *xtr_chd = lft_chd->children[--(lft_chd->children_size)], tmp_chd;
+	Node *xtr_chd = lft_chd->children[--(lft_chd->children_size)], *tmp_chd;
 	for(int i = 0; i < rht_chd->children_size; i++)
 	{
 		tmp_chd = rht_chd->children[i];
@@ -278,7 +267,7 @@ bool delete_main(Node **node, int *ret_val, bool to_ret, int value)
 		if((*node)->children_size > 0)
 		{
 			adjust = delete_main(&((*node)->children[(*node)->children_size - 1]), ret_val, to_ret, 0);
-			j = (*root)->value_size - 1;
+			j = (*node)->value_size - 1;
 		}
 		else
 		{
@@ -361,7 +350,7 @@ bool delete_main(Node **node, int *ret_val, bool to_ret, int value)
 			lft_chd->values[lft_chd->value_size++] = prnt->values[j];
 			(*node)->value_size--;
 
-			for(int x = j; x = (*node)->value_size; x++)
+			for(int x = j; x < (*node)->value_size; x++)
 				prnt->values[x] = prnt->values[x + 1];
 
 			for(int x = 0; x < rht_chd->value_size; x++)
@@ -386,7 +375,12 @@ bool delete_main(Node **node, int *ret_val, bool to_ret, int value)
 void delete(Node **root, int value)
 {
 	puts("Deletion in progess");
-	printf("%d\n", delete_main(root, NULL, false, value));
+	if(delete_main(root, NULL, false, value))
+	{
+		Node *to_free = *root;
+		*root = (*root)->children[0];
+		free(to_free);
+	}
 	puts("Deletion ended");
 	return;
 }
