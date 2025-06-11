@@ -12,12 +12,27 @@
 
 typedef struct node Node;
 
+struct tracker *tracker;
+
 struct node
 {
 	int value_size;
 	int children_size;
 	int values[DEG - 1];
 	Node *children[DEG];
+};
+
+struct item
+{
+	int prnt;
+	int idx;
+	Node *chd;
+	struct item *next;
+};
+
+struct tracker
+{
+	struct item *head;
 };
 
 #define MAKE_NEW(var) \
@@ -28,10 +43,12 @@ if(var == NULL) \
 \
 } while(0);
 
+void fix_error(Node *, int);
 void insert(Node **, int);
 void delete(Node **, int);
 int check_balance(Node *, Node *);
 void inorder(Node *);
+
 
 int main(void)
 {
@@ -56,10 +73,89 @@ int main(void)
 	insert(&root, 911);
 	insert(&root, 20010);
 	inorder(root);
-	delete(&root, 1);
+	//delete(&root, 1);
+	//delete(&root, 6);
+	delete(&root,99);
 	//insert(&root, 0);
 	inorder(root);
 	return 0;
+}
+
+int track(int prnt, int idx, Node *chd)
+{
+	struct item *new = (struct item *) malloc(sizeof(struct item));
+	if(new == NULL)
+	{
+		return 0;
+	}
+	memset(new, 0, sizeof(struct item));
+	new->prnt = prnt;
+	new->idx = idx;
+	new->chd = chd;
+
+	new->next = tracker->head;
+	tracker->head = new;
+	return 0;	
+}
+
+void free_tracker(struct tracker *tracker)
+{
+	struct item *temp = tracker->head, *to_free;
+	while(temp != NULL)
+	{
+		printf("%d %d %p\n", temp->idx, temp->prnt, temp->chd);
+		to_free = temp;
+		temp = temp->next;
+		free(to_free);
+	}
+	free(tracker);
+}
+
+void fix_error(Node *node, int init)
+{
+	if(node == NULL)
+		return;
+
+	node->values[node->value_size++] = tracker->head->prnt;
+	
+	int start_off = node->value_size;
+	for(; node->value_size < DEG - 1;)
+		node->values[node->value_size++] = tracker->head->chd->values[node->value_size - start_off];
+	
+	if(tracker->head->idx < DEG - 1)
+	{
+		for(int i = tracker->head->idx; i < DEG - 2; i++)
+			node->values[i]  = node->values[i + 1];
+		node->values[DEG - 2] = tracker->head->chd->values[node->value_size - start_off];
+	}
+
+	start_off = node->children_size;
+	if(node->children_size > 0)
+	{
+		for(; node->children_size++ > DEG;)
+		{
+			node->children[node->children_size++] = tracker->head->chd->children[node->children_size - start_off];
+		}
+		if(tracker->head->idx + 1 < DEG)
+		{
+			for(int i = tracker->head->idx + 1; i < DEG - 1; i++)
+				node->children[i]  = node->children[i + 1];
+			node->children[DEG - 1] = tracker->head->chd->children[node->children_size - start_off];
+		}
+	}
+
+	int idx = tracker->head->idx;
+	free(tracker->head->chd);
+	struct item *to_free = tracker->head;
+	tracker->head = tracker->head->next;
+	
+	free(to_free);
+	if(tracker->head == NULL)
+		return;
+	else
+		fix_error(node->children[idx], 0);
+
+	return;
 }
 
 int insert_main(Node **root, bool *pass, Node **new_chd, int value)
@@ -100,6 +196,7 @@ int insert_main(Node **root, bool *pass, Node **new_chd, int value)
 	//if(j < (*root)->children_size)
 	if((*root)->children_size > 0)
 	{
+		//
 		if(j < 0)
 			j = 0;
 
@@ -152,6 +249,11 @@ int insert_main(Node **root, bool *pass, Node **new_chd, int value)
 			int to_ret = (*root)->values[med];
 			Node *new;
 			MAKE_NEW(new);
+
+			if(new == NULL)
+			{
+				
+			}
 			for(int x = med + 1; x < DEG - 1; x++)
 			{
 				new->values[new->value_size++] = (*root)->values[x];
@@ -178,6 +280,7 @@ int insert_main(Node **root, bool *pass, Node **new_chd, int value)
 			//new->children_size = DEG - (med + 1);
 			*new_chd = new;
 			//*pass = true;
+			track(to_ret, i + 1, new);
 			return to_ret;
 		}
 	}
@@ -191,8 +294,9 @@ void insert(Node **root, int value)
 	printf("%d started\n", value);
 	Node *new_chd = NULL;
 	bool pass = false;
+	tracker = (struct tracker *) malloc(sizeof(struct tracker *));
 	int ret_val = insert_main(root, &pass, &new_chd, value);
-	
+
 	if(pass)
 	{
 		Node *new = NULL;
@@ -203,6 +307,9 @@ void insert(Node **root, int value)
 		new->children_size = 2;
 		*root = new;
 	}
+	
+	printf("%p\n", tracker);
+	free_tracker(tracker);
 	printf("%d ended\n\n", value);
 }
 
@@ -290,10 +397,12 @@ bool delete_main(Node **node, int *ret_val, bool to_ret, int value)
 			else
 			{
 				found = true;
+				j = med;
 				break;
 			}
 		}
 
+		printf("%d %d\n", (*node)->values[0], j);
 		if(found)
 		{
 			if((*node)->children_size > 0)
