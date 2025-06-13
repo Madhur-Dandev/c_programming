@@ -75,7 +75,7 @@ int main(void)
 	inorder(root);
 	//delete(&root, 1);
 	//delete(&root, 6);
-	delete(&root,99);
+	delete(&root, 99);
 	//insert(&root, 0);
 	inorder(root);
 	return 0;
@@ -86,7 +86,7 @@ int track(int prnt, int idx, Node *chd)
 	struct item *new = (struct item *) malloc(sizeof(struct item));
 	if(new == NULL)
 	{
-		return 0;
+		return 1;
 	}
 	memset(new, 0, sizeof(struct item));
 	new->prnt = prnt;
@@ -122,9 +122,9 @@ void fix_error(Node *node, int init)
 	for(; node->value_size < DEG - 1;)
 		node->values[node->value_size++] = tracker->head->chd->values[node->value_size - start_off];
 	
-	if(tracker->head->idx < DEG - 1)
+	if(tracker->head->idx - 1 < DEG - 1)
 	{
-		for(int i = tracker->head->idx; i < DEG - 2; i++)
+		for(int i = tracker->head->idx - 1; i < DEG - 2; i++)
 			node->values[i]  = node->values[i + 1];
 		node->values[DEG - 2] = tracker->head->chd->values[node->value_size - start_off];
 	}
@@ -132,13 +132,13 @@ void fix_error(Node *node, int init)
 	start_off = node->children_size;
 	if(node->children_size > 0)
 	{
-		for(; node->children_size++ > DEG;)
+		for(; node->children_size > DEG;)
 		{
 			node->children[node->children_size++] = tracker->head->chd->children[node->children_size - start_off];
 		}
-		if(tracker->head->idx + 1 < DEG)
+		if(tracker->head->idx < DEG)
 		{
-			for(int i = tracker->head->idx + 1; i < DEG - 1; i++)
+			for(int i = tracker->head->idx; i < DEG - 1; i++)
 				node->children[i]  = node->children[i + 1];
 			node->children[DEG - 1] = tracker->head->chd->children[node->children_size - start_off];
 		}
@@ -164,6 +164,8 @@ int insert_main(Node **root, bool *pass, Node **new_chd, int value)
 	{
 		Node *new;
 		MAKE_NEW(new);
+		if(new == NULL)
+			return 0;
 		new->values[new->value_size++] = value;
 		*root = new;
 		return 0;
@@ -252,7 +254,20 @@ int insert_main(Node **root, bool *pass, Node **new_chd, int value)
 
 			if(new == NULL)
 			{
-				
+				for(; i < DEG - 2; i++)
+					(*root)->values[i] = (*root)->values[i + 1];				
+				if(i < DEG - 1)
+					(*root)->values[DEG - 2] = extra;
+
+				if(ret_chd != NULL)
+				{
+					for(; i < DEG - 1; i++)
+						(*root)->children[i + 1] = (*root)->children[i + 2];
+					if(i + 1 < DEG)
+						(*root)->children[DEG - 1] = extra_chd;
+				}
+
+				fix_error((*root)->children[i], 0);
 			}
 			for(int x = med + 1; x < DEG - 1; x++)
 			{
@@ -301,11 +316,14 @@ void insert(Node **root, int value)
 	{
 		Node *new = NULL;
 		MAKE_NEW(new);
-		new->values[new->value_size++] = ret_val;
-		new->children[0] = *root;
-		new->children[1] = new_chd;
-		new->children_size = 2;
-		*root = new;
+		if(new != NULL)
+		{
+			new->values[new->value_size++] = ret_val;
+			new->children[0] = *root;
+			new->children[1] = new_chd;
+			new->children_size = 2;
+			*root = new;
+		}
 	}
 	
 	printf("%p\n", tracker);
