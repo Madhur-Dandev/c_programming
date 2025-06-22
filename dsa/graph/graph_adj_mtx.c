@@ -10,6 +10,7 @@ Graph *init(bool);
 void add_connection(Graph *, int, int, int);
 void delete_connection(Graph *, int, int, int);
 void print(Graph *);
+Graph *transpose(Graph *);
 void freeup(Graph *);
 
 int main(void)
@@ -20,7 +21,10 @@ int main(void)
 	add_connection(graph, 1, 3, 1);
 	add_connection(graph, 0, 1, 1);
 	add_connection(graph, 0, 2, 99);
-	delete_connection(graph, 1, 2, 0);
+	Graph *trnps = transpose(graph);
+	print(trnps);
+	freeup(trnps);
+	//delete_connection(graph, 1, 2, 0);
 	print(graph);
 	freeup(graph);
 	return 0;
@@ -82,6 +86,20 @@ void print(Graph *grph)
 		}
 		puts("");
 	}
+}
+
+Graph *transpose(Graph *grph)
+{
+	Graph *trnps = init(grph->is_weighted);
+	if(trnps == NULL)
+		return trnps;
+
+	for(int i = 0; i < VRTCS; i++)
+		for(int j = 0; j < VRTCS; j++)
+			if(grph->mtrx[i][j] != 0)
+				add_connection(trnps, j, i, grph->mtrx[i][j]);
+
+	return trnps;
 }
 
 void freeup(Graph *grph)
