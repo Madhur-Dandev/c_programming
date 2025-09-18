@@ -1,8 +1,6 @@
-// syntax: <scheme>://<user>:<password>@<host>:<port>/<path>;<params>?<query>#<frag>
-// In unix file-system all characters except forward slash (/) are supported.
-// In path component, the use of characters like ; , ? , : are prohibited.
-// to be continued
-#include <stdio.h>
+/* syntax: <scheme>://<user>:<password>@<host>:<port>/<path>;<params>?<query>#<frag>
+ * Supported schemes: http, ftp, smtp, mailto, telnet, file
+ */
 #include <string.h>
 #include <stdlib.h>
 #include <regex.h>
@@ -58,29 +56,28 @@ int parse(char *url)
 	// parts: hostname, path, others.
 	regex_t reg;
 	int ret;
+	
 	char errbuf[128];
 	regmatch_t *match;
 	struct urltkn *url_info ;
-	// 1: scheme
-	// 3: username
-	// 5: password
-	// 6: hostname or ip address
-	// 9: port number
-
-	/* Allow character in url:
-	 * Registered: . / : ; ? & # @
-	 * Non-registerd: 
-	 */
-	// char *hostname = "([[:alpha:]]{1,20})://(([[:alnum:]]+)(:([[:alnum:]])+)?@)?((www.)?[[:alpha:]][[:alnum:]\\-]+(\\.[[:alpha:]]+){1,3}|([[:digit:]]{1,3}.){3}[[:digit:]]{1,3})(:([[:digit:]]{1,5}))?"; // 9
-
-
 	/* urlregex breakdown
 	 * scheme pattern: [A-z][A-z0-9+\\.-]+:// (optional)
 	 * username and password: username = (([A-z0-9\\._@:-]+):([A-z0-9\\._@:-]+)@) ...?
 	 * ...	[A-z0-9\\._@:-]+ ; password = [A-z0-9\\._@:-]+@ (optional)
 	 * 
 	 */
-	char *urlregex = "(([A-z][A-z0-9+\\.-]+)://)?(([A-z0-9\\._@-]+)(:([A-z0-9\\._@-]+)?)?@)?([0-9]{1,3}(\\.[0-9]{1,3}){3}|[A-z0-9][A-z0-9-]+[A-z0-9](\\.[A-z0-9][A-z0-9-]+[A-z0-9]){1,})(:[0-9]{1,5})?";
+	// char *urlregex = "(([A-z][A-z0-9+\\.-]+)://)?(([A-z0-9\\._@-]+)(:([A-z0-9\\._@-]+)?)?@)?([0-9]{1,3}(\\.[0-9]{1,3}){3}|[A-z0-9][A-z0-9-]+[A-z0-9](\\.[A-z0-9][A-z0-9-]+[A-z0-9]){1,})(:[0-9]{1,5})?"; // v1
+	/* Groups info
+	 * 1. <scheme>://
+	 * 2. <username>:<password>@
+	 * 3. <username>
+	 * 4. :<password>
+	 * 5. <host-ip>|<host-domain>
+	 * 6. <last-matched-ip-portion>
+	 * 7. <last-matched-domain-portion>
+	 * 8. port
+	 */
+	char *urlregex = "([A-z][A-z0-9+\\.-]+://)?(([A-z0-9\\._@!\\*'\\(\\),\\+$;\\?&=-]+)(:[A-z0-9\\._@!\\*'\\(\\),\\+$;\\?&=-]*)?@)?([0-9]{1,3}(\\.[0-9]{1,3}){3}|[A-z0-9][A-z0-9-]+[A-z0-9](\\.[A-z0-9][A-z0-9-]+[A-z0-9]){1,})(:[0-9]{1,5})?";
 
 	if((ret = regcomp(&reg, hostname, REG_EXTENDED)))
 	{
@@ -90,14 +87,14 @@ int parse(char *url)
 	}
 	else
 	{
-		match = (regmatch_t *) calloc(10, sizeof(regmatch_t));
+		match = (regmatch_t *) calloc(9, sizeof(regmatch_t));
 		if(match == NULL)
 		{
 			perror("Error");
 			return 1;
 		}
 
-		if((ret = regexec(&reg, url, 10, match, 0)))
+		if((ret = regexec(&reg, url, 9, match, 0)))
 		{
 			regerror(ret, &reg, errbuf, sizeof(errbuf));
 			puts(errbuf);
