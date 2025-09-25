@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
@@ -8,6 +9,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <regex.h>
+#include <stdbool.h>
 
 #define MAX_ERRLEN 256
 #define SA struct sockaddr
@@ -24,20 +26,29 @@
 #define INADDRSTR_LOOPBACK "127.0.0.1"
 #define INADDRSTR_ANY "0.0.0.0"
 
+#define MAX_BUFF 4096
+
 /* common way to handle an error */
 #define COMMON_ERR_HANDLING(func) 							\
 	if(func < 0)											\
-		error_handlder(0, true);
+		error_handler(0, true);
 
 /* Function macros for handling interrupt error */
-#define COMMON_EINTR_HANDLING(res, func) 					\
+#define COMMON_EINTR_HANDLING(res, func, exit) 				\
 	while((res = func) < 0) \
 	{														\
 		if(errno == EINTR) 									\
 			continue; 										\
 															\
-		error_handlder(0, true); 									\
+		if(exit)											\
+			error_handler(0, exit); 						\
+		else												\
+			return res;										\
 	}
+
+static regex_t reg_allwdhdrs;
+static char pool[MAX_BUFF];
+static int lastc = 0, pcount = 0;
 
 int
 Socket(int, int, int);
@@ -54,11 +65,14 @@ Accept(int, SA *restrict, socklen_t *restrict);
 int
 Close(int);
 
+ssize_t
+readline(int, void *, size_t, void *, size_t, int *, int *);
+
 void
 error_handler(int, bool);
 
-int
-build_headers_regex(regex_t *);
+void
+build_headers_regex(void);
 
 int
 main(void)
@@ -68,13 +82,15 @@ main(void)
 	
 	uint32_t len;
 
+	build_headers_regex();
+		
 	lissock = Socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	bzero(&lisaddr, sizeof(lisaddr));
 	lisaddr.sin_family = AF_INET;
 	lisaddr.sin_port = htons(80);
 	if(inet_pton(AF_INET, INADDRSTR_ANY, &lisaddr.sin_addr) < 0)
-		error_handlder(0, true);
+		error_handler(0, true);
 
 	Bind(lissock, (SA *) &lisaddr, sizeof(lisaddr));
 
@@ -84,18 +100,28 @@ main(void)
 
 	/* using cliaddr for saving some memory */
 	if(getsockname(lissock, (SA *) &cliaddr, &len) < 0)
-		error_handlder(0, false);
+		error_handler(0, false);
 
 	printf("Server started at: %s:%hu\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
 
 	bzero(&cliaddr, sizeof(cliaddr));
+
+	char buf[MAX_BUFF];
+	ssize_t total_read;
 	while((clisock = Accept(lissock, (SA *) &cliaddr, &len)))
 	{
 		printf("Client Connected: %s:%hu\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
+			
+		while((total_read = readline(clisock, buf, MAX_BUFF, pool, MAX_BUFF, &pcount, &lastc)) > 0)
+		{
+			puts(buf);
+		}
+
 		Close(clisock);
 	}
 
 	Close(lissock);
+	regfree(&reg_allwdhdrs);
 }
 
 int
@@ -132,7 +158,7 @@ Accept(int socket, SA *restrict address,
 	int res;
 
 	COMMON_EINTR_HANDLING(res, accept(socket, address,
-										address_len));
+								address_len), true);
 
 	return res;
 }
@@ -141,9 +167,52 @@ int Close(int fildes)
 {
 	int res;
 
-	COMMON_EINTR_HANDLING(res, close(fildes));
+	COMMON_EINTR_HANDLING(res, close(fildes), true);
 
 	return res;
+}
+
+ssize_t readline(int fd, void *buf, size_t size, void *pool, size_t psize, int *ptotal, int *plastc)
+{
+	int count = 0;
+	char *buffer = (char *) buf;
+	char *pbuffer = (char *) pool;
+
+	while(true)
+	{
+		if(*ptotal == 0)
+		{
+			COMMON_EINTR_HANDLING(*ptotal, read(fd, pool, psize), false);
+			if(*ptotal == 0)
+			{
+				*ptotal = *plastc = 0;
+				break;
+			}
+		}
+		
+		for(; *plastc < *ptotal; (*plastc)++)
+		{
+			if(pbuffer[*plastc] == '\n')
+			{
+				buffer[count] = 0;
+				(*plastc)++;
+				return count;
+			}
+
+			if(pbuffer[*plastc] == '\r')	
+				continue;
+
+			if(pbuffer[*plastc] == 0)
+			{
+				*ptotal = 0;
+				break;
+			}
+
+			if(count < size)
+				buffer[count++] = pbuffer[*plastc];
+		}
+	}
+	return count;
 }
 
 void
@@ -174,21 +243,26 @@ error_handler(int err, bool to_exit)
 
 	/* check whether to exit on failure */
 	if(to_exit)
+	{
+		/* call to cleanup function here*/
 		exit(EXIT_FAILURE);
+	}
 }
 
-int
-build_headers_regex(regex_t *reg)
+void
+build_headers_regex(void)
 {
-	static const char
+	const char
 	regpttrn[] = "^(accept|accept-encoding|allow|cache-\
 				control|client-ip|connection|content-\
 				encoding|content-type|content-lenght|\
 				date|except|host|user-agent):.*($|\\n|\\r\\n)";
 
+	char err_buf[128];
 	int res;
-	if((res = regcomp(reg, regpttrn, REG_EXTENDED|REG_ICASE)) != 0)
-		error_handler(res, false);
-
-	return res;
+	if((res = regcomp(&reg_allwdhdrs, regpttrn, REG_EXTENDED|REG_ICASE)) != 0)
+	{
+		regerror(res, &reg_allwdhdrs, err_buf, 128);
+		fprintf(stderr, "%s\n", err_buf);
+	}
 }
