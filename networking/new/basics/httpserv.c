@@ -23,10 +23,32 @@
 #	define IN6ADDR_LOOPBACK ::1
 #endif
 
-#define INADDRSTR_LOOPBACK "127.0.0.1"
-#define INADDRSTR_ANY "0.0.0.0"
+#define INADDRSTR_LOOPBACK "127.0.0.1" 						/* String form of INADDR_LOOPBACK */
+#define INADDRSTR_ANY "0.0.0.0"								/* String form of INADDR_ANY */
 
-#define MAX_BUFF 4096
+#define MAX_BUFF 4096 										/* maximum character buffer size */
+#define HNAME_MAX 128 										/* max size of header name */
+#define HVALUE_MAX 256
+
+/* http version */
+#define HTTPV1 	 1
+#define HTTPV1_1 2
+#define HTTPV2   3
+
+/* http methods */
+#define GET    	1
+#define POST   	2
+#define PUT	   	3
+#define DELETE 	4
+#define HEAD   	5
+#define OPTIONS 6
+
+/* structure for storing headers and header values */
+struct header 
+{
+	char name[HNAME_MAX];
+	char **value;
+};
 
 /* common way to handle an error */
 #define COMMON_ERR_HANDLING(func) 							\
@@ -45,6 +67,14 @@
 		else												\
 			return res;										\
 	}
+
+struct reqinfo 
+{
+	uint16_t method;
+	uint16_t httpv;
+	char path[512];
+	
+};
 
 static regex_t reg_allwdhdrs;
 static char pool[MAX_BUFF];
@@ -73,6 +103,8 @@ error_handler(int, bool);
 
 void
 build_headers_regex(void);
+
+
 
 int
 main(void)
@@ -110,14 +142,17 @@ main(void)
 	ssize_t total_read;
 	while((clisock = Accept(lissock, (SA *) &cliaddr, &len)))
 	{
+		pcount = lastc = 0;
 		printf("Client Connected: %s:%hu\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
 			
 		while((total_read = readline(clisock, buf, MAX_BUFF, pool, MAX_BUFF, &pcount, &lastc)) > 0)
 		{
-			puts(buf);
+			if(regexec(&reg_allwdhdrs, buf, 0, NULL, 0) == 0)
+				puts(buf);
 		}
 
 		Close(clisock);
+		puts("Connection terminated");
 	}
 
 	Close(lissock);
@@ -256,7 +291,7 @@ build_headers_regex(void)
 	regpttrn[] = "^(accept|accept-encoding|allow|cache-\
 				control|client-ip|connection|content-\
 				encoding|content-type|content-lenght|\
-				date|except|host|user-agent):.*($|\\n|\\r\\n)";
+				date|except|host|user-agent)[\t ]*:[\t ]*.*($|\\n|\\r\\n)";
 
 	char err_buf[128];
 	int res;
