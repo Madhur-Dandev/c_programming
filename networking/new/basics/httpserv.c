@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <regex.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 #define MAX_ERRLEN 256
 #define SA struct sockaddr
@@ -43,13 +44,6 @@
 #define HEAD   	5
 #define OPTIONS 6
 
-/* structure for storing headers and header values */
-struct header 
-{
-	char name[HNAME_MAX];
-	char **value;
-};
-
 /* common way to handle an error */
 #define COMMON_ERR_HANDLING(func) 							\
 	if(func < 0)											\
@@ -68,13 +62,42 @@ struct header
 			return res;										\
 	}
 
+/* ---------- Request Message related Utilities ---------- */ 
+
+/* structure for storing headers and header values */
+struct header 
+{
+	char name[HNAME_MAX];
+	char *value;
+	struct header *left;
+	struct header *right;
+};
+
+typedef struct header Header;
+
+/* structure for containing all information about 
+ * http request message.
+*/
 struct reqinfo 
 {
 	uint16_t method;
 	uint16_t httpv;
 	char path[512];
-	
+	Header *hdrs;
 };
+
+typedef struct reqinfo ReqInfo;
+
+int add_header(Reqinfo *, char *, int, ...);
+
+int free_msgstrct(ReqInfo *);
+
+bool chkreqmsg(char *, char *);
+
+int parsemsg(int, ReqInfo *);
+
+/* 					---------------------					*/
+
 
 static regex_t reg_allwdhdrs;
 static char pool[MAX_BUFF];
@@ -300,4 +323,187 @@ build_headers_regex(void)
 		regerror(res, &reg_allwdhdrs, err_buf, 128);
 		fprintf(stderr, "%s\n", err_buf);
 	}
+}
+
+int get_height(Header *node);
+{
+	if(node == NULL)
+		return 0;
+
+	int lh = get_height(node->left);
+	int rh = get_height(node-right);
+
+	return (lh > rh ? lh : rh ) + 1	;
+}
+
+/* need to handle the null side (if exist) in rotation */
+void rotate_left(Header **node);
+{
+	Header *rchd = (*node)->right;
+	
+	(*node)->right = rchd->left;
+	rchd->left = *node;
+	*node = rchd;
+
+	return;
+}
+
+void rotate_right(Header **node);
+{
+	Header *lchd = (*node)->left;
+	
+	(*node)->left = lchd->rightt;
+	lchd->right = *node;
+	*node = lchd;
+
+	return;
+}
+
+int add_header(Header **node, Header *new, int8_t *chdblnc)
+{
+	/* Function for new header insertion in header tree
+	*/
+
+	if(*node == NULL)
+	{
+		*node = new;
+		if(chdblnc != NULL)
+			*chdblnc = 0;
+
+		return 1;
+	}
+
+	int8_t comp = (int8_t) strncmp(node->name, new->name, HNAME_MAX), cblnc;
+	int lh, rh, res, retval;
+
+	/* calculating left and right height */
+	if(comp >= 0)
+	{
+		lh = (*node)->left == NULL ? 0 : get_height((*node)->left);	
+		retval = rh = add_header(&(*node)->right, new, &cblnc);
+	}
+	else
+	{
+		retval = lh = add_header(&(*node)->left, new, &cblnc);
+		rh = (*node)->right == NULL ? 0 : get_height((*node)->right);	
+	}
+
+	res = lh - rh;
+
+	if(res > 1)
+	{
+		if(cblnc < 0)
+		{
+			/* rotate child left */
+			rotate_left(&(*node)->left);
+		}
+
+		/* rotate right */
+		rotate_right(node);
+	}
+	else if(res < -1)
+	{
+		if(cblnc > 0)
+		{
+			/* rotate child right */
+			rotate_right(&(*node)->right);
+		}
+
+		/* rotate left */
+		rotate_left(node);
+	}
+	else{}
+	
+	if(chdblnc != NULL)
+		*chdblnc = res; /* return current different to parent */
+
+	return retval + 1;
+}
+
+int Add_header(ReqInfo *request, char *header, int valc, ...)
+{
+	/* All value arguments must be a string. */
+	va_list valargs;
+	va_start(valargs, valc);
+
+	Header *new = malloc(sizeof(Header));
+
+	if(new == NULL)
+		return -1;
+
+	if(strnlen(header, HNAME_MAX) < HNAME_MAX)
+		strncpy(new->name, header, HNAME_MAX);
+
+	new->value = malloc(HVALUE_MAX * valc);
+
+	if(new->value == NULL)
+		return -1;
+
+	for(int i = 0; i < valc; i++)
+		strncpy(new->value[HVALUE_MAX * i], va_arg(valargs, char *), HVALUE_MAX);
+
+	new->left = new->right = NULL;
+	
+	va_end(valargs);
+
+	/* call function for adding header */
+	
+	return 0;
+}
+
+Header *getinsucc(Header **node)
+{
+	if(*node = NULL)
+		return NULL;
+
+	if((*node)->left == NULL)
+	{
+		Header *toret = *node;
+
+		*node = ((*node)->right != null) ? (*node)->right : NULL;
+
+		return toret;
+	}
+
+	return getinsucc(&(*node)->right);
+}
+
+int delete_header(Header **node, char *header, int8_t *chdblnc)
+{
+	if(strncmp((*node)->name, header, HNAME_MAX) == 0)
+	{
+		Header *temp = *node;
+		if((*node)->left == NULL && (*node)->right == NULL)
+			*node = NULL;
+
+		if((*node)->left != NULL && (*node)->right == NULL)
+			*node = (*node)->left;
+
+		if((*node)->left == NULL && (*node)->right != NULL)
+			*node = (*node)->right;
+
+		if((*node)->left == NULL || (*node)->right == NULL)
+		{
+			free(temp);
+			*chdblnc = 0;
+			return 0;
+		}
+
+		Header *scsr = getinsucc(&(*node)->right);
+		
+		if(scsr == NULL)
+		{
+			*chdblnc = 0;
+			return 0;
+		}
+
+		*node = scsr;
+		/* to be continued */
+	}
+	return;
+}
+
+int Delete_header(ReqInfo *request, char *header)
+{
+	if(request->
 }
